@@ -57,14 +57,8 @@
     height: 22px;
   }
 
-  /* Phones: the two panels stay side by side, as on desktop, just more compact, and without their photos. */
-  .panel {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .panel-image {
-    display: none;
-  }
+  /* Phones: the two panels stay side by side, as on desktop, just more compact. Their photos show whenever there's
+     room for them on one screen (css/split.css). */
 
   .panel {
     gap: 20px;
