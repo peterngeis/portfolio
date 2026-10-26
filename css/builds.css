@@ -1,0 +1,377 @@
+/*
+ * builds.css
+ * More builds (the ski winch and go-kart card) and the slide-in side pane that it and "Build details" open.
+ * Script: js/drawer.js
+ */
+
+/* The build photo above has no black space of its own, so this section supplies the full 2 x gap. */
+/* The tinker time line and the ski winch and go-kart card share one screen, centered under the top bar, and
+   hold for a moment (data-full-screen in index.html). It's at least one screen tall: an open tray makes it taller,
+   and then it scrolls normally. The photo is sized to leave room for the line above it, at its own shape, so
+   the whole winch is always in frame. --line-room is the height the line (and, on phones, the title under the
+   photo) needs. */
+.winch-frame {
+  --line-room: 150px;
+  display: flex;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: calc(env(safe-area-inset-top, 0px) + var(--nav-height) + 24px) 0 32px;
+  box-sizing: border-box;
+  background: var(--paper);
+}
+
+.winch-frame .wrap {
+  width: 100%;
+}
+
+.winch-frame {
+  --project-media: clamp(220px, calc(100svh - var(--nav-height) - 56px - var(--line-room)), 600px);
+}
+
+.winch-frame .builds-intro {
+  margin-bottom: clamp(20px, 3.5vh, 40px);
+}
+
+/* The line about tinker time, set like the introduction's paragraphs. */
+.builds-intro {
+  margin: 0 0 calc(var(--section-gap) * 1.5);
+  max-width: 60ch;
+  font-size: clamp(17px, 1.4vw, max(20px, 1.04vw));
+  line-height: 1.6;
+}
+
+/* Phrases in the tinker time line that open a tray: buttons that read as part of the sentence,
+   underlined in lavender. */
+.tinker-trigger {
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--lavender);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.tinker-trigger:hover,
+.tinker-trigger[aria-expanded="true"] {
+  color: var(--lavender);
+}
+
+/* The trays they open, under the line. */
+.tinker-tray {
+  margin: 0 0 clamp(28px, 4vh, 48px);
+}
+
+.tinker-tray[hidden] {
+  display: none;
+}
+
+html.motion-enabled .tinker-tray:not([hidden]) {
+  animation: tinker-tray-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes tinker-tray-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* ---------- Projects: the band and the ski winch share one layout (the keyboard shares its type sizes) ----------
+   The main photo on the left, every one at the same height (--project-media, set on .winch-frame so it
+   leaves room for the line above), its width from its own shape (--ratio on the element, width / height) so
+   nothing is cropped. On the right: a title, a line, and an action, at the same sizes for all three, matching the
+   tinker time line. */
+.project {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 20px clamp(24px, 4vw, 64px);
+  align-items: end;
+}
+
+.project-media {
+  position: relative;
+  display: block;
+  width: calc(var(--project-media) * var(--ratio));
+  max-width: 100%;
+  aspect-ratio: var(--ratio);
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--slate);
+}
+
+.project-media img,
+.project-media video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.project-media video {
+  background: #FFFFFF;
+}
+
+.project-text {
+  display: block;
+  padding-bottom: 6px;
+}
+
+/* Titles and lines read like the tinker time line above them: the same size and spacing, the title in bold. */
+.project-title {
+  display: block;
+  margin: 0;
+  font-size: clamp(17px, 1.4vw, max(20px, 1.04vw));
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.project-line {
+  display: block;
+  margin: 2px 0 0;
+  max-width: 60ch;
+  font-size: clamp(17px, 1.4vw, max(20px, 1.04vw));
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.project-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.project-action::before {
+  content: "";
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  transition: background-color 0.3s ease;
+}
+
+a.project-action:hover,
+a.project-action:focus-visible {
+  color: var(--lavender);
+}
+
+a.project-action:hover::before {
+  background: currentColor;
+}
+
+/* The keyboard: its title and line above two columns of renders. Left column: the full board and the exploded clip;
+   right column: the profile view and the close-up. The right column is about 1.21 times as wide, which makes both
+   columns end at the same height. */
+.componentry-text {
+  margin-bottom: 18px;
+}
+
+.componentry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.21fr);
+  gap: 14px;
+  align-items: start;
+  max-width: 1000px;
+}
+
+.componentry-column {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.componentry figure {
+  margin: 0;
+}
+
+.componentry img,
+.componentry video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.componentry video {
+  aspect-ratio: 720 / 558;
+  background: #FFFFFF;
+}
+
+/* Hover previews: images crossfading beside the cursor (screens with a mouse only). Each preview's height follows
+   the shape of the image showing (js/tinker-trays.js), so every image is shown whole, never cropped. */
+.tinker-peek {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 40;
+  width: 340px;
+  height: 158px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--slate);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, height 0.35s ease;
+}
+
+.tinker-peek.is-visible {
+  opacity: 1;
+}
+
+.tinker-peek img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.tinker-peek img.is-shown {
+  opacity: 1;
+}
+
+/* The ski winch card is a project laid out as one big button that opens its side pane. */
+.card {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* Touch screens: only the first photo. (A tap counts as a hover there, which flashed the second photo.) */
+.card-image img.photo-hover {
+  display: none;
+}
+
+@media (hover: hover) {
+  .card-image img {
+    transition: opacity 0.5s ease;
+  }
+
+  .card-image img.photo-hover {
+    display: block;
+    opacity: 0;
+  }
+
+  .card:hover img.photo-hover,
+  .card:focus-visible img.photo-hover {
+    opacity: 1;
+  }
+
+  .card:hover .project-action::before {
+    background: currentColor;
+  }
+}
+
+/* drawer */
+.drawer {
+  margin: 0 0 0 auto;
+  width: min(680px, 100vw);
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  background: var(--paper);
+  color: var(--text);
+  transform: translateX(100%);
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1), overlay 0.55s allow-discrete, display 0.55s allow-discrete;
+}
+
+.drawer[open] {
+  transform: none;
+}
+
+@starting-style {
+  .drawer[open] {
+    transform: translateX(100%);
+  }
+}
+
+.drawer::backdrop {
+  background: rgba(8, 14, 18, 0.55);
+}
+
+.drawer-scroll-area {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;   /* reaching the end of the pane never scrolls the page behind it */
+  padding: calc(env(safe-area-inset-top, 0px) + 20px) var(--gutter) calc(env(safe-area-inset-bottom, 0px) + 48px);
+}
+
+.drawer-close-button {
+  position: sticky;
+  top: 0;
+  float: right;
+  z-index: 2;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.drawer-body h3 {
+  clear: both;
+  padding-top: 24px;
+  font-size: clamp(40px, 6vw, 76px);
+}
+
+.drawer-body .feature-meta {
+  margin-top: 14px;
+}
+
+.drawer-body > p:not(.feature-meta) {
+  margin-top: 18px;
+  max-width: 60ch;
+}
+
+.drawer-body .links {
+  margin-top: 24px;
+}
+
+.drawer-photos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 32px;
+}
+
+.drawer-photos figure {
+  margin: 0;
+}
+
+.drawer-photos .wide {
+  grid-column: 1 / -1;
+}
+
+.drawer-photos img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.drawer-photos .wide img {
+  aspect-ratio: 16 / 10;
+}
+
+/* Shown whole, at its own shape. */
+.drawer-photos .natural img {
+  aspect-ratio: auto;
+  height: auto;
+}

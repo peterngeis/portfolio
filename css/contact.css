@@ -1,0 +1,90 @@
+/*
+ * contact.css
+ * The contact block and footer. It is always one full screen tall, and its type scales with both the
+ * width and the height of the screen so everything fits at any size, with the footer line at the bottom.
+ */
+
+.contact {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+  background: var(--lavender);
+  color: var(--on-lavender);
+  /* The top bar floats over the top of this block, so the content starts below it. */
+  padding: calc(var(--nav-height) + clamp(16px, 6vh, 96px)) 0 clamp(20px, 3.5vh, 44px);
+  /* Links to #contact land with the block flush with the top of the screen (the top bar overlays it). */
+  scroll-margin-top: calc(-1 * (env(safe-area-inset-top, 0px) + var(--nav-height)));
+}
+
+.contact > .wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+}
+
+/* The heading is sized by whichever is smaller, the width or the height, so it never pushes the footer off screen. */
+.contact h2 {
+  color: var(--on-lavender);
+  font-size: clamp(64px, min(13vw, 21vh), max(230px, 12vw));
+}
+
+.contact .contact-intro {
+  margin-top: clamp(16px, 3vh, 40px);
+  max-width: 40ch;
+  font-size: clamp(16px, min(1.4vw, 2.4vh), max(20px, 1.04vw));
+}
+
+.email-link {
+  align-self: flex-start;
+  margin-top: clamp(16px, 3vh, 40px);
+  font-size: clamp(26px, min(4.4vw, 7vh), max(66px, 3.3vw));
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 0.16em;
+  overflow-wrap: anywhere;
+}
+
+.email-link:hover {
+  text-decoration-thickness: 6px;
+}
+
+.contact .contact-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: clamp(16px, 3vh, 32px);
+  margin-bottom: clamp(24px, 5vh, 64px);
+}
+
+.contact .pill.filled {
+  background: #000000;
+  color: #FFFFFF;
+  border-color: #000000;
+}
+
+.contact .pill.filled:hover {
+  background: #FFFFFF;
+  color: #000000;
+  border-color: #FFFFFF;
+}
+
+.contact .pill:not(.filled):hover {
+  background: var(--on-lavender);
+  color: var(--lavender);
+  border-color: var(--on-lavender);
+}
+
+.footer-credits {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-top: auto;   /* pushes the footer line to the bottom of the screen */
+  padding-top: 18px;
+  border-top: 1.5px solid currentColor;
+  font-size: 14px;
+  font-weight: 500;
+}

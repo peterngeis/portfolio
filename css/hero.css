@@ -1,0 +1,412 @@
+/*
+ * hero.css
+ * The landing screen: the loader, the giant name, the ASCII radar and its beams, and the lavender cursor reveal.
+ * Script: js/hero.js
+ */
+
+.loader {
+  display: none;
+}
+
+html.motion-enabled:not(.loader-seen) .loader {
+  display: grid;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--slate);
+  color: var(--on-slate);
+  grid-template-rows: auto 1fr auto;
+  padding: calc(env(safe-area-inset-top, 0px) + 24px) var(--gutter) calc(env(safe-area-inset-bottom, 0px) + 28px);
+  /* Fallback: leave after 4.5 s even if the script never says the page is ready. */
+  animation: loader-out 0.9s cubic-bezier(0.7, 0, 0.2, 1) 4.5s forwards;
+  cursor: pointer;
+}
+
+/* js/hero.js adds .is-hero-ready once the font has loaded and the hero is laid out, so the loader only leaves
+   when the name underneath is final. */
+html.motion-enabled.is-hero-ready:not(.loader-seen) .loader {
+  animation: loader-out-now 0.9s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+}
+
+@keyframes loader-out {
+  to {
+    transform: translateY(-100%);
+    visibility: hidden;
+  }
+}
+
+@keyframes loader-out-now {
+  to {
+    transform: translateY(-100%);
+    visibility: hidden;
+  }
+}
+
+.loader-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  color: var(--on-slate-muted);
+}
+
+.loader-header b {
+  color: var(--on-slate);
+  font-weight: 600;
+}
+
+.loader-temperature {
+  align-self: center;
+  justify-self: center;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.12em;
+  font-size: clamp(110px, 24vw, 300px);
+  font-weight: 800;
+  line-height: 0.8;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.loader-unit {
+  font-size: 0.16em;
+  line-height: 1.05;
+  letter-spacing: 0;
+  font-weight: 600;
+  padding-top: 0.25em;
+  color: var(--lavender);
+}
+
+.loader-bar {
+  height: 3px;
+  background: var(--loader-track);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.loader-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--lavender);
+  transform-origin: left;
+  animation: loader-fill 1.4s cubic-bezier(0.3, 0.6, 0.2, 1) both;
+}
+
+@keyframes loader-fill {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: calc(var(--nav-height) + 6vh) var(--gutter) clamp(24px, 4vh, 44px);
+}
+
+.hero-name {
+  color: var(--ink);
+  font-size: 17vw;
+  margin: 0 0 clamp(20px, 4vh, 40px) -0.045em;
+}
+
+.name-line {
+  display: block;
+  overflow: hidden;
+  line-height: 1;
+  padding: 0.06em 0 0.16em;
+}
+
+.name-line-second {
+  text-align: right;
+  margin-top: -0.3em;
+}
+
+.name-line-text {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.name-letter {
+  display: inline-block;
+}
+
+/* The letters wait below their line until the hero is ready (font loaded, layout final), then rise.
+   On a first visit they wait for the loader to slide away first. */
+html.motion-enabled.has-javascript .name-letter {
+  transform: translateY(105%);
+}
+
+html.motion-enabled.is-hero-ready .name-letter {
+  transform: none;
+  animation: letter-rise 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--hero-entrance-delay, 0.05s) + var(--letter-index) * 55ms);
+}
+
+html.motion-enabled.is-hero-ready:not(.loader-seen) {
+  --hero-entrance-delay: 0.6s;
+}
+
+/* Everything else on the landing screen fades in with the letters, never before the layout is final. */
+html.has-javascript .hero-meta,
+html.has-javascript .radar-beams {
+  opacity: 0;
+  transition: opacity 0.6s ease var(--hero-entrance-delay, 0.05s);
+}
+
+html.has-javascript.is-hero-ready .hero-meta,
+html.has-javascript.is-hero-ready .radar-beams {
+  opacity: 1;
+}
+
+@keyframes letter-rise {
+  from {
+    transform: translateY(105%);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+.hero-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--muted);
+  border-top: 1.5px solid var(--ink);
+  padding-top: 16px;
+}
+
+.hero-meta b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.cue {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.cue-line {
+  display: block;
+  width: 1.5px;
+  height: 34px;
+  background: var(--ink);
+  transform-origin: top;
+}
+
+html.motion-enabled .cue-line {
+  animation: cue-line-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes cue-line-pulse {
+  0% {
+    transform: scaleY(0);
+  }
+
+  50% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+
+  51% {
+    transform-origin: bottom;
+  }
+
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+/* cursor reveal + radar */
+.hero > .hero-name,
+.hero > .hero-meta {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-reveal {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: inherit;
+  /* Hidden until js/hero.js opens the soft-edged circle at the target. */
+  -webkit-mask-image: radial-gradient(circle 1px at -50px -50px, #000, transparent);
+  mask-image: radial-gradient(circle 1px at -50px -50px, #000, transparent);
+}
+
+.hero-reveal .hero-name {
+  position: relative;
+  color: var(--lavender);
+}
+
+/* The PC build photo */
+.hero-reveal-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 47% 57%;
+  filter: brightness(0.6) saturate(1.1);
+}
+
+.hero-reveal .hero-meta {
+  position: relative;   /* paint above the photo */
+  color: rgba(255, 255, 255, 0.82);
+  border-top-color: rgba(255, 255, 255, 0.82);
+}
+
+.hero-reveal .hero-meta b,
+.hero-reveal .cue {
+  color: #FFFFFF;
+}
+
+.hero-reveal .cue-line {
+  background: #FFFFFF;
+}
+
+.radar {
+  position: absolute;
+  z-index: 3;
+  left: var(--gutter);
+  top: 0;
+  pointer-events: none;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: clamp(7.5px, 0.7vw, 12px);
+  line-height: 1.14;
+  color: var(--lavender);   /* the same lavender as the outgoing pulses */
+  white-space: pre;
+  opacity: 0;
+  width: 56ch;
+}
+
+.radar.is-placed {
+  transition: opacity 0.6s ease var(--hero-entrance-delay, 0.05s);
+}
+
+html:not(.has-javascript) .radar,
+html.is-hero-ready .radar.is-placed {
+  opacity: 1;
+}
+
+.hero.has-radar-in-flow .radar {
+  position: relative;
+  left: auto;
+  top: auto;
+  margin-bottom: 14px;
+}
+
+.hero-reveal-spacer {
+  flex: none;
+}
+
+.radar-art {
+  display: block;
+  width: 56ch;
+}
+
+.radar-note {
+  display: block;
+  margin-top: 1em;
+  color: var(--muted);
+  font-family: var(--font-family);
+  font-size: max(8px, 1.05em);
+  white-space: nowrap;
+}
+
+.radar-readout {
+  display: block;
+  color: var(--lavender);
+  margin-bottom: 0.8em;
+  font-variant-numeric: tabular-nums;
+}
+
+.radar-beams {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.radar-beams .beam-track {
+  stroke: var(--lavender);
+  stroke-width: 1;
+  stroke-dasharray: 2 7;
+  opacity: 0.22;
+}
+
+.radar-beams .beam-pulse-out {
+  stroke: var(--lavender);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.radar-beams .beam-pulse-return {
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+
+.radar-target-layer {
+  mix-blend-mode: difference;
+  color: var(--lavender);
+}
+
+.radar-target-layer.is-scanning {
+  color: #FFFFFF;
+}
+
+.radar-target-layer .target-reticle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.radar-target-layer .target-ping {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  opacity: 0;
+}
+
+.radar-target-layer .target-label {
+  fill: currentColor;
+  font: 600 11px ui-monospace, Menlo, Consolas, monospace;
+  letter-spacing: 0.04em;
+}
+
+html:not(.has-javascript) .hero-reveal,
+html:not(.has-javascript) .radar-beams,
+html:not(.has-javascript) .radar {
+  display: none;
+}
+
+.radar-beams.is-idle,
+.radar-target-layer.is-idle {
+  opacity: 0;
+}

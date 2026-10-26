@@ -1,0 +1,354 @@
+/*
+ * build-photo.css
+ * My current build: the pinned photo that zooms to full screen, and the clickable part points on the PC.
+ * Script: js/build-photo.js (the zoom timing lives in its ZOOM settings).
+ */
+
+.build-photo {
+  position: relative;
+  /* Links to #off-the-clock land with the photo's top at the top of the screen, just before the zoom starts.
+     (Cancels the nav-bar offset that other anchors use.) */
+  scroll-margin-top: calc(-1 * (env(safe-area-inset-top, 0px) + var(--nav-height)));
+}
+
+.stage {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+
+/* How long the photo stays pinned: this height minus one screen (190vh = 90vh of scrolling). */
+html.motion-enabled .build-photo {
+  height: 190vh;
+}
+
+html.motion-enabled .stage {
+  position: sticky;
+  top: 0;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--slate);
+}
+
+/* zoom uses transforms only (GPU-composited): the frame scales up while the photo inside counter-scales */
+html.motion-enabled .frame {
+  transform: scale(0.82, 0.76);
+  transform-origin: 50% 50%;
+  border-radius: 24px;
+  will-change: transform;
+}
+
+html.motion-enabled .build-photo.is-full-screen .frame {
+  border-radius: 0;
+}
+
+.cover {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 47% 57%;
+}
+
+html.motion-enabled .cover {
+  transform: scale(1.4634, 1.5789);
+  will-change: transform;
+}
+
+.cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 47% 57%;
+}
+
+.frame::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 34%;
+  background: linear-gradient(to top, rgba(8, 14, 18, 0.62), rgba(8, 14, 18, 0));
+  pointer-events: none;
+}
+
+.frame-caption {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: clamp(20px, 5vh, 48px);
+  z-index: 2;
+  color: #FFFFFF;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px 24px;
+}
+
+.frame-caption h3 {
+  color: #FFFFFF;
+  font-size: clamp(26px, 3.4vw, 46px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.frame-caption p {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.frame-caption .frame-caption-link {
+  font: inherit;
+  color: #FFFFFF;
+  background: none;
+  border: 0;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* "Off the clock" inside the frame at its top left, under the top bar, at the same size as the other section
+   headings. It mirrors the "My current build" caption at the bottom: both appear once the photo has zoomed in
+   (see .is-expanded below), and since both live in the frame, both ride it as it shrinks on the way back up.
+   A soft shade along the top of the photo keeps it readable. */
+.chapter-header {
+  position: absolute;
+  left: var(--gutter);
+  top: calc(env(safe-area-inset-top, 0px) + var(--nav-height) + clamp(4px, 1.5vh, 16px));
+  z-index: 3;
+  color: #FFFFFF;
+}
+
+.chapter-title {
+  margin: 0;
+  font-size: clamp(40px, 7vw, 112px);
+  color: #FFFFFF;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+}
+
+.frame::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 40%;
+  z-index: 1;
+  background: linear-gradient(to bottom, rgba(8, 14, 18, 0.55), rgba(8, 14, 18, 0));
+  pointer-events: none;
+}
+
+html:not(.motion-enabled) .build-photo .stage {
+  height: auto;
+}
+
+html:not(.motion-enabled) .build-photo .frame {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+}
+
+html.motion-enabled .frame-caption {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+html.motion-enabled .build-photo.is-expanded .frame-caption {
+  opacity: 1;
+  transform: none;
+}
+
+/* The heading arrives and leaves with the caption, mirrored: the caption rises into place, the heading drops in. */
+html.motion-enabled .chapter-header {
+  opacity: 0;
+  transform: translateY(-16px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+html.motion-enabled .build-photo.is-expanded .chapter-header {
+  opacity: 1;
+  transform: none;
+}
+
+/* The same Scroll cue as the landing screen, in white, shown on phones too. */
+.frame-caption .cue {
+  display: flex;
+  margin-left: auto;
+  color: #FFFFFF;
+}
+
+.frame-caption .cue-line {
+  background: #FFFFFF;
+}
+
+.hint-touch {
+  display: none;
+}
+
+@media (hover: none) {
+  .hint-touch {
+    display: inline;
+  }
+
+  .hint-hover {
+    display: none;
+  }
+}
+
+.hotspot {
+  position: absolute;
+  z-index: 3;
+  transform: translate(-50%, -50%);
+}
+
+.hotspot-button {
+  display: block;
+  padding: 10px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.hotspot:hover,
+.hotspot:focus-within,
+.hotspot.is-open {
+  z-index: 4;
+}
+
+html.motion-enabled .hotspot {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+html.motion-enabled .build-photo.is-expanded .hotspot {
+  opacity: 1;
+  transition-delay: calc(var(--hotspot-index, 0) * 70ms);
+}
+
+.hotspot-marker {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2.5px solid #FFFFFF;
+  background: rgba(17, 32, 42, 0.35);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.hotspot-marker::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--lavender);
+}
+
+html.motion-enabled .hotspot-marker::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid var(--lavender);
+  animation: hotspot-ping 2.2s ease-out infinite;
+}
+
+@keyframes hotspot-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+
+  to {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+.hotspot-card {
+  position: absolute;
+  left: 44px;
+  top: 50%;
+  transform: translate(-6px, -50%);
+  background: var(--card-background);
+  color: var(--card-text);
+  padding: 8px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  width: max-content;
+  max-width: min(64vw, 290px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+}
+
+.hotspot.is-flipped .hotspot-card {
+  left: auto;
+  right: 44px;
+  transform: translate(6px, -50%);
+}
+
+.hotspot-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 100%;
+  width: 6px;
+}
+
+.hotspot.is-flipped .hotspot-card::before {
+  right: auto;
+  left: 100%;
+}
+
+/* --card-shift-x and --card-shift-y are set by js/build-photo.js to keep the card on screen. */
+.hotspot:hover .hotspot-card,
+.hotspot:focus-within .hotspot-card,
+.hotspot.is-open .hotspot-card {
+  opacity: 1;
+  transform: translate(var(--card-shift-x, 0px), calc(-50% + var(--card-shift-y, 0px)));
+  pointer-events: auto;
+}
+
+.hotspot-card b {
+  display: block;
+  font-weight: 700;
+}
+
+.hotspot-card > span {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #5F5A72;
+  margin-top: 2px;
+}
+
+.hotspot-links {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 8px !important;
+}
+
+.hotspot-links a {
+  color: #000000;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.hotspot-links a:hover {
+  color: #5A43E0;
+}

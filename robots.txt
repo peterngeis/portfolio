@@ -1,0 +1,41 @@
+# robots.txt: only works at the root of the domain (a <username>.github.io site or a custom domain).
+#
+# Search engines are allowed to fetch the page on purpose: they need to read the
+# noindex tag in index.html to know not to list it. Blocking them here would hide
+# that tag, and Google can still list a blocked URL if someone links to it.
+User-agent: *
+Allow: /
+
+# AI and dataset crawlers that honor robots.txt: don't fetch anything.
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: OAI-SearchBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /

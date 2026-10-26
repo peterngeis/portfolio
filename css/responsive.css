@@ -1,0 +1,208 @@
+/*
+ * responsive.css
+ * Tablet and phone layouts, plus turning animation off for visitors who prefer reduced motion.
+ * Keep this file last in index.html so its rules win.
+ */
+
+@media (max-width: 960px) {
+  .feature,
+  .feature.payload {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+}
+
+@media (max-width: 760px) {
+  :root {
+    --nav-height: 56px;
+  }
+
+  /* Phones: keep On the clock and Off the clock in the top bar; Contact and Résumé are both in the contact section. */
+  .nav-links a[href="#contact"],
+  .nav-links .pill {
+    display: none;
+  }
+
+  .nav-links {
+    gap: 16px;
+    font-size: 14px;
+  }
+
+  /* While the experience timeline is on screen (js/nav.js adds .is-solid), the top bar gets a solid
+     background instead of the color-inversion effect, so it never overlaps the text scrolling underneath. */
+  .nav {
+    transition: background-color 0.2s ease;
+  }
+
+  .nav.is-solid {
+    mix-blend-mode: normal;
+    background: var(--paper);
+  }
+
+  /* Phones: the two roles and a narrow Scroll cue share one row; the cue stacks its word over a short line. */
+  .hero-meta {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 14px;
+  }
+
+  .hero-meta .cue {
+    justify-self: end;
+    align-self: start;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  .hero-meta .cue-line {
+    height: 22px;
+  }
+
+  /* Phones: the two panels stay side by side, as on desktop, just more compact, and without their photos. */
+  .panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .panel-image {
+    display: none;
+  }
+
+  .panel {
+    gap: 20px;
+    padding: calc(env(safe-area-inset-top, 0px) + var(--nav-height) + 16px) 16px 28px;
+  }
+
+  .panel:hover,
+  .panel:focus-visible {
+    flex-grow: 1;
+  }
+
+  .panel-title {
+    font-size: clamp(30px, 10vw, 44px);
+  }
+
+  .panel-description {
+    font-size: 14px;
+  }
+
+  .panel-action {
+    margin-top: 12px;
+  }
+
+  .experience-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .dial {
+    top: calc(var(--nav-height) + env(safe-area-inset-top, 0px));
+    z-index: 5;
+    background: var(--paper);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 10px 0 12px;
+    margin: 0 calc(var(--gutter) * -1);
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+    border-bottom: 1.5px solid var(--line);
+  }
+
+  .odometer {
+    font-size: 52px;
+  }
+
+  .rail {
+    flex: 1;
+    margin: 0;
+  }
+
+  .rail li::after {
+    width: 12px;
+    height: 12px;
+    border-width: 2.5px;
+  }
+
+  .dial-title {
+    display: none;
+  }
+
+  .timeline {
+    padding-top: 16px;
+  }
+
+  .project,
+  .componentry {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Phones: the line wraps to more lines and the card stacks, so the photo leaves room for both. */
+  .winch-frame {
+    --line-room: 330px;
+    /* Capped near what a wide photo reaches at full width, so all three projects come out about the same height. */
+    --project-media: clamp(200px, calc(100svh - var(--nav-height) - 56px - var(--line-room)), 300px);
+  }
+
+
+
+  /* The phone version of the team photo is not cropped: the image box matches its natural shape. */
+  .banner img {
+    aspect-ratio: 1200 / 766;
+    object-fit: contain;
+  }
+
+  .field-photos-header p {
+    display: none;
+  }
+
+  .credential-groups {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* On phones the contact heading can be larger than its desktop minimum, since the screen is tall and narrow. */
+  .contact h2 {
+    font-size: clamp(64px, min(20vw, 21vh), 110px);
+  }
+
+  /* Build photo caption: the instructions wrap in their own column, so the Scroll cue sits beside them
+  at the bottom right instead of dropping onto a row of its own underneath. */
+  .frame-caption {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 8px 16px;
+  }
+
+  .frame-caption h2 {
+    grid-column: 1 / -1;
+  }
+
+  .frame-caption p:not(.cue) {
+    grid-column: 1;
+  }
+
+  .frame-caption .cue {
+    grid-column: 2;
+    margin: 0 0 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Very narrow phones (iPhone SE and similar): tighten the top bar so it stays on one line. */
+@media (max-width: 360px) {
+  .brand {
+    font-size: 15px;
+  }
+
+  .nav-links {
+    gap: 12px;
+    font-size: 13px;
+  }
+}

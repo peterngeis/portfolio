@@ -1,0 +1,162 @@
+/*
+ * experience.css
+ * The experience timeline: the rolling year, the progress rail, and the timeline entries.
+ * Script: js/experience.js
+ */
+
+/* The split panels above have no padding of their own, so this section supplies the full 2 x gap. */
+.experience {
+  padding: calc(var(--section-gap) * 2) 0 var(--section-gap);
+}
+
+.experience-heading {
+  font-size: clamp(40px, 7vw, 112px);
+  margin-bottom: calc(var(--section-gap) * 2);
+}
+
+.experience-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: clamp(32px, 6vw, 110px);
+  align-items: start;
+}
+
+.dial {
+  /* The progress rail and the job title under it share this width, so the title only wraps when it truly doesn't fit. */
+  --dial-content-width: 460px;
+  position: sticky;
+  top: calc(var(--nav-height) + 5vh);
+}
+
+.odometer {
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  height: 1em;
+  overflow: hidden;
+  font-size: clamp(88px, 12vw, 200px);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.reel {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.reel span {
+  display: block;
+  height: 1em;
+}
+
+.rail {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: clamp(20px, 4vh, 36px) 0 0;
+  max-width: var(--dial-content-width);
+}
+
+.rail li {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.rail li:first-child {
+  flex: none;
+}
+
+.rail li::before {
+  content: "";
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+  transition: background-color 0.4s ease;
+}
+
+.rail li:first-child::before {
+  display: none;
+}
+
+.rail li::after {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid var(--line);
+  background: var(--paper);
+  transition: border-color 0.4s ease, background-color 0.4s ease;
+}
+
+.rail li.is-complete::before {
+  background: var(--lavender);
+}
+
+.rail li.is-complete::after {
+  border-color: var(--lavender);
+  background: var(--lavender);
+}
+
+.dial-title {
+  margin-top: clamp(16px, 3vh, 28px);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--ink);
+  max-width: var(--dial-content-width);
+  min-height: 3em;
+  line-height: 1.3;
+}
+
+.timeline-entry {
+  border-left: 3px solid var(--line);
+  padding: 0 0 clamp(80px, 16vh, 170px) clamp(20px, 2.4vw, 36px);
+  transition: border-color 0.4s ease;
+}
+
+.timeline-entry:last-child {
+  padding-bottom: 8px;
+}
+
+.timeline-entry.is-current {
+  border-left-color: var(--lavender);
+}
+
+.entry-dates {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline-entry h3 {
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-top: 8px;
+}
+
+.entry-organization {
+  color: var(--muted);
+  font-size: 16px;
+  margin-top: 4px;
+}
+
+.timeline-entry > p:not(.entry-dates):not(.entry-organization) {
+  margin-top: 16px;
+  max-width: 62ch;
+}
+
+.entry-link {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 15px;
+}

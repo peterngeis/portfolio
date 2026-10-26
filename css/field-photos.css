@@ -1,0 +1,275 @@
+/*
+ * field-photos.css
+ * Field photos: a grey map of the United States with a pin where each photo was taken.
+ * With motion on, the section pins to the screen and scrolling flies from place to place: each photo grows out of
+ * its pin, shows its caption once fully open, then shrinks back into the pin (js/field-photos.js adds .is-touring).
+ * With reduced motion or without JavaScript, the map and the photos simply sit one after the other.
+ */
+
+.field-photos {
+  position: relative;
+  --map-line: #6E6A7C;
+}
+
+.field-map-stage {
+  position: relative;
+  padding: clamp(40px, 8vh, 80px) 0;
+}
+
+.field-photos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: clamp(28px, 5vh, 48px);
+}
+
+.field-photos-header h2 {
+  font-size: clamp(40px, 7vw, 112px);
+}
+
+.field-photos-header p {
+  color: var(--muted);
+  font-size: 15px;
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* ---------- The map ---------- */
+
+.field-map {
+  position: relative;
+  margin: 0 var(--gutter);
+  max-width: 1100px;
+}
+
+.usa-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.usa-outline {
+  fill: rgba(255, 255, 255, 0.025);
+  stroke: var(--map-line);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* State borders: a darker grey than the outline, so the country reads first. */
+.usa-states path {
+  fill: none;
+  stroke: #3B3847;
+  stroke-width: 1;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Without the tour, pins sit at their map position as a percentage of the map's 1000 x 627 grid. */
+.map-pin {
+  position: absolute;
+  left: calc(var(--x) / 1000 * 100%);
+  top: calc(var(--y) / 627 * 100%);
+  width: 0;
+  height: 0;
+}
+
+.map-pin-dot {
+  position: absolute;
+  left: -6px;
+  top: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--lavender);
+  background: var(--paper);
+}
+
+.map-pin-label {
+  position: absolute;
+  left: 12px;
+  top: -0.7em;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* Boston sits at the map's right edge, so its label goes on the left of the pin. */
+.map-pin[data-place="boston"] .map-pin-label {
+  left: auto;
+  right: 12px;
+}
+
+/* ---------- Photos without the tour: a simple mixed-height row ---------- */
+
+.field-photo-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: clamp(20px, 3vw, 44px);
+  padding: clamp(28px, 5vh, 48px) var(--gutter) 0;
+}
+
+.field-photo {
+  margin: 0;
+}
+
+.field-photo img {
+  display: block;
+  height: calc(var(--photo-height) * 0.6vh);
+  min-height: 200px;
+  width: auto;
+  max-width: 100%;
+  border-radius: 4px;
+}
+
+.field-photo figcaption {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.field-photo figcaption b {
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.field-photos-progress {
+  display: none;
+}
+
+/* ---------- The tour (motion on) ---------- */
+
+.field-photos.is-touring .field-map-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.field-photos.is-touring .field-photos-header {
+  padding-top: calc(var(--nav-height) + env(safe-area-inset-top, 0px) + clamp(8px, 3vh, 32px));
+  margin-bottom: 0;
+}
+
+/* The map fills the space under the header; js/field-photos.js sizes and zooms the drawing inside it. */
+.field-photos.is-touring .field-map {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  max-width: none;
+  overflow: hidden;   /* keeps the zoomed-in map out from behind the heading */
+}
+
+.field-photos.is-touring .usa-map {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.field-photos.is-touring .map-pin {
+  left: 0;
+  top: 0;
+  transition: opacity 0.4s ease;
+}
+
+.field-photos.is-touring .map-pin-dot {
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.field-photos.is-touring .map-pin.is-current .map-pin-dot {
+  background: var(--lavender);
+  transform: scale(1.25);
+}
+
+.field-photos.is-touring .map-pin.is-current .map-pin-dot::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid var(--lavender);
+  animation: map-pin-ping 1.6s ease-out infinite;
+}
+
+@keyframes map-pin-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+
+  to {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+
+.field-photos.is-touring .field-photo-list {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+/* Every photo waits, hidden, at its open position; the script grows it out of its pin. */
+.field-photos.is-touring .field-photo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.field-photos.is-touring .field-photo.is-active {
+  visibility: visible;
+}
+
+.field-photos.is-touring .field-photo img {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  border-radius: 6px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+}
+
+/* The caption appears only once the photo is fully open. */
+.field-photos.is-touring .field-photo figcaption {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.field-photos.is-touring .field-photo.is-open figcaption {
+  opacity: 1;
+  transform: none;
+}
+
+.field-photos.is-touring .field-photos-progress {
+  display: block;
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(16px, 3vh, 28px));
+  height: 2px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.field-photos.is-touring .field-photos-progress-fill {
+  display: block;
+  height: 100%;
+  background: var(--lavender);
+  transform-origin: left;
+  transform: scaleX(0);
+}

@@ -1,0 +1,193 @@
+/*
+ * class-demo.css
+ * The class demo: the painter canvas, its chart and controls, and the section heading.
+ * Script: js/painter.js
+ */
+
+.class-demo {
+  background: var(--surface);
+  padding: var(--section-gap) 0;
+}
+
+/* painter */
+
+/* The canvas is sized to the screen height so the whole demo, title to the scrub note, fits in one view.
+400px is the room taken by the chart, controls, readout, note, and nav bar. */
+.painter-stage {
+  position: relative;
+  width: min(100%, max(300px, calc(100svh - 400px)));
+  margin: 0 auto;
+}
+
+.painter-stage canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: #FFFFFF;
+  border-radius: 4px;
+  border: 1.5px solid var(--ink);
+}
+
+.painter-status {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.painter-status[hidden] {
+  display: none;
+}
+
+.painter-chart {
+  position: relative;
+  margin-top: 16px;
+  height: 108px;
+  border: 1.5px solid var(--line);
+  border-radius: 4px;
+  background: var(--paper);
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.painter-chart svg {
+  position: absolute;
+  inset: 8px 0 22px;
+  width: 100%;
+  height: calc(100% - 30px);
+  overflow: visible;
+}
+
+.painter-chart .curve-other {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.7;
+}
+
+.painter-chart .curve-current {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+}
+
+.painter-chart .playhead {
+  stroke: var(--lavender);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-label {
+  position: absolute;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.chart-label-vertical {
+  left: 10px;
+  top: 6px;
+}
+
+.chart-label-horizontal {
+  right: 10px;
+  bottom: 4px;
+}
+
+.chart-legend {
+  left: 10px;
+  bottom: 4px;
+  display: flex;
+  gap: 14px;
+}
+
+.chart-legend .legend-swatch {
+  display: inline-block;
+  width: 16px;
+  height: 0;
+  vertical-align: middle;
+  margin-right: 6px;
+  border-top: 2.5px solid var(--ink);
+}
+
+.chart-legend .legend-swatch-dashed {
+  border-top: 1.5px dashed var(--muted);
+}
+
+.painter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  color: var(--ink);
+}
+
+.segmented-control {
+  display: inline-flex;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 3px;
+  margin: 0;
+}
+
+.segmented-control input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.segmented-control label {
+  padding: 8px 15px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segmented-control input:checked + label {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.segmented-control input:focus-visible + label {
+  outline: 2px solid var(--lavender);
+  outline-offset: 2px;
+}
+
+.painter-readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.painter-readout b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.painter-note {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-top: 10px;
+  max-width: 60ch;
+}

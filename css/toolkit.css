@@ -1,0 +1,73 @@
+/*
+ * toolkit.css
+ * The toolkit ticker.
+ * Script: js/toolkit.js
+ */
+
+.toolkit {
+  background: var(--slate);
+  color: var(--on-slate);
+  padding: clamp(48px, 9vh, 96px) 0;
+  overflow: hidden;
+}
+
+.toolkit-heading {
+  color: var(--on-slate);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 0 var(--gutter);
+  margin-bottom: clamp(20px, 4vh, 36px);
+}
+
+.ticker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5em;
+  padding: 0 var(--gutter);
+  font-size: clamp(30px, 4.6vw, 68px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.ticker-row + .ticker-row {
+  margin-top: 0.2em;
+  color: var(--lavender);
+}
+
+.ticker-track {
+  display: contents;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ticker-track li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.ticker-track li::after {
+  content: "";
+  width: 0.26em;
+  height: 0.26em;
+  border-radius: 50%;
+  border: 0.07em solid currentColor;
+  opacity: 0.6;
+}
+
+html.motion-enabled .ticker-row {
+  flex-wrap: nowrap;
+  padding: 0;
+  white-space: nowrap;
+  gap: 0;
+  will-change: transform;
+}
+
+html.motion-enabled .ticker-track {
+  display: flex;
+  flex: none;
+  gap: 0.5em;
+  padding-right: 0.5em;
+}

@@ -1,0 +1,325 @@
+/*
+ * base.css
+ * Design tokens (colors, font, spacing), page defaults, and the pieces shared by every section:
+ * buttons, the top navigation, bullet lists, section headings, feature layouts, and captions.
+ * Change the palette in :root. --paper is the background, --ink the main text, --lavender the accent.
+ */
+
+:root {
+  --paper: #000000;
+  --surface: #0B0A0F;
+  --ink: #FFFFFF;
+  --text: #DAD7E4;
+  --muted: #918DA0;
+  --line: #26242E;
+  --lavender: #CEC2F6;
+  --on-lavender: #000000;
+  --loader-track: rgba(255, 255, 255, 0.14);
+  --slate: #0F0E14;
+  --on-slate: #FFFFFF;
+  --on-slate-muted: #9C98AB;
+  --card-background: #FFFFFF;
+  --card-text: #000000;
+  --font-family: "Epilogue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --gutter: clamp(20px, 4vw, 56px);
+  --nav-height: 64px;
+  /* Section rhythm: headings sit 2 x --section-gap below the previous section and 2 x --section-gap above their content. */
+  --section-gap: clamp(28px, 4.5vh, 52px);
+  color-scheme: dark;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+html {
+  scroll-padding-top: calc(env(safe-area-inset-top, 0px) + var(--nav-height));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* A link to a far-off section fades the page out, jumps, and fades back in js/core.js, so nothing in between
+   plays on the way. The top bar stays put. */
+main,
+body > footer {
+  transition: opacity 0.17s ease;
+}
+
+html.is-jumping main,
+html.is-jumping body > footer {
+  opacity: 0;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--text);
+  font-family: var(--font-family);
+  font-size: clamp(17px, 0.42vw + 9px, 20px);   /* 17px up to ~1900px wide, growing to 20px on large monitors */
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 60;
+  background: var(--paper);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+p {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--lavender);
+  outline-offset: 3px;
+}
+
+/* Content width grows on large monitors (1400px up to about 2080px) so sections fill big screens the way they fill a laptop. */
+.wrap {
+  max-width: clamp(1400px, 78vw, 2080px);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.display-type {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.035em;
+  line-height: 0.88;
+}
+
+.pill {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 1.5px solid currentColor;
+  background: transparent;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+.pill.filled {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.pill.filled:hover {
+  background: var(--lavender);
+  border-color: var(--lavender);
+  color: var(--on-lavender);
+}
+
+.pill:not(.filled):hover {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.pill .play-icon {
+  width: 0;
+  height: 0;
+  border-left: 8px solid currentColor;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+}
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding-top: env(safe-area-inset-top, 0px);
+  color: #FFFFFF;
+  mix-blend-mode: difference;
+}
+
+.nav .wrap {
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: none;
+}
+
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  font-size: 17px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 2.4vw, 34px);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.nav-links a {
+  text-decoration: none;
+}
+
+.nav-links a:not(.pill):hover {
+  text-decoration: underline;
+}
+
+/* The chapter you're in (set by js/nav.js) is underlined in the top bar. */
+.nav-links a.is-current {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+  font-weight: 700;
+}
+
+.nav .pill {
+  min-height: 38px;
+  padding: 0 16px;
+}
+
+.nav .pill:hover {
+  background: #FFFFFF;
+  color: #000000;
+  border-color: #FFFFFF;
+}
+
+/* Shared by the experience timeline, the class demo, and the senior design section. */
+.bullet-list {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+  max-width: 62ch;
+}
+
+.bullet-list li {
+  position: relative;
+  padding-left: 24px;
+}
+
+.bullet-list li + li {
+  margin-top: 10px;
+}
+
+.bullet-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid var(--lavender);
+}
+
+.section-heading {
+  font-size: clamp(40px, 7vw, 112px);
+}
+
+.feature {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(32px, 5vw, 88px);
+  align-items: start;
+  margin-top: calc(var(--section-gap) * 2);
+}
+
+.feature-copy h3 {
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.feature-meta {
+  color: var(--muted);
+  font-size: 15px;
+  margin-top: 12px;
+}
+
+.feature-copy > p:not(.feature-meta) {
+  margin-top: 18px;
+  max-width: 60ch;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+  color: var(--ink);
+}
+
+.caption {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* Link color inside the timeline, the features, and the drawer. */
+.timeline-entry a,
+.feature a:not(.pill),
+.drawer a:not(.pill) {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.timeline-entry a:hover,
+.feature a:not(.pill):hover {
+  color: var(--lavender);
+}

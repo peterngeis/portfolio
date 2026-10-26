@@ -1,0 +1,72 @@
+/*
+ * statement.css
+ * The introduction: the large statement, the Sensō-ji photo, and the two paragraphs.
+ * Script: js/statement.js
+ */
+
+.statement {
+  padding: clamp(100px, 22vh, 220px) 0 clamp(80px, 16vh, 160px);
+  /* One spacing for every step of the introduction: statement to photo, photo to text, and paragraph to paragraph. */
+  --intro-gap: clamp(28px, 4.2vh, 48px);
+}
+
+.statement-text {
+  /* 70px up to 1920px wide, then it grows with the screen so the introduction keeps its proportions on large monitors. */
+  font-size: clamp(30px, 4.5vw, max(70px, 3.65vw));
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: -0.028em;
+  color: var(--ink);
+  max-width: 19em;
+}
+
+.statement-text .statement-word {
+  transition: opacity 0.2s linear;
+}
+
+.statement-paragraph {
+  margin: 0;
+  max-width: 60ch;
+  font-size: clamp(17px, 1.4vw, max(20px, 1.04vw));
+  line-height: 1.6;
+}
+
+.statement-paragraph + .statement-paragraph {
+  margin-top: var(--intro-gap);
+}
+
+.statement-grid {
+  display: grid;
+  /* js/statement.js replaces these columns with the photo's fitted width and leaves the rest to the paragraphs.
+     This is the starting layout before the script runs. */
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: var(--intro-gap) clamp(28px, 5vw, max(88px, 4.6vw));   /* rows (stacked on phones), then columns */
+  align-items: start;
+  margin-top: var(--intro-gap);
+}
+
+.statement-figure {
+  margin: 0;
+  max-width: 100%;
+}
+
+/* The photo's size is set by js/statement.js so the statement, photo, and paragraphs fit on screen together. */
+.statement-figure img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.statement-figure .caption a {
+  color: inherit;
+}
+
+.statement-figure .caption {
+  text-wrap: balance;
+}
+
+@media (max-width: 860px) {
+  .statement-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

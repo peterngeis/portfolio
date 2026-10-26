@@ -1,0 +1,27 @@
+/*
+ * scroll-pause.css
+ * Scroll pauses: frames that hold still on screen for a moment while the page keeps scrolling.
+ * Script: js/scroll-pause.js (adds .is-pinned and sizes the wrapper).
+ */
+
+.scroll-pause {
+  position: relative;
+}
+
+/* js/scroll-pause.js adds .is-pinned and sets --pause-top and the wrapper's min-height when a frame fits on screen. */
+.scroll-pause.is-pinned > :first-child {
+  position: sticky;
+  top: var(--pause-top, 0px);
+}
+
+/* While the page is measuring layout, pinned frames sit at their natural spot so positions are exact. */
+html.is-measuring .scroll-pause.is-pinned > :first-child {
+  position: relative;
+  top: auto;
+}
+
+/* During a layout pass (js/core.js), the browser's own scroll anchoring stays out of it;
+   core.js puts the visitor back in the same place itself once the pass is done. */
+html.is-measuring {
+  overflow-anchor: none;
+}
