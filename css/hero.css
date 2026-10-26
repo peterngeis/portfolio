@@ -143,11 +143,13 @@ html.motion-enabled.is-hero-ready:not(.loader-seen) .loader {
    On a first visit they wait for the loader to slide away first. */
 html.motion-enabled.has-javascript .name-letter {
   transform: translateY(105%);
+  visibility: hidden;
 }
 
 html.motion-enabled.is-hero-ready .name-letter {
   transform: none;
-  animation: letter-rise 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  visibility: visible;
+  animation: letter-rise 1s cubic-bezier(0.2, 0.8, 0.2, 1) both, letter-show 0s linear both;
   animation-delay: calc(var(--hero-entrance-delay, 0.05s) + var(--letter-index) * 55ms);
 }
 
@@ -165,6 +167,16 @@ html.has-javascript .radar-beams {
 html.has-javascript.is-hero-ready .hero-meta,
 html.has-javascript.is-hero-ready .radar-beams {
   opacity: 1;
+}
+
+@keyframes letter-show {
+  from {
+    visibility: hidden;
+  }
+
+  to {
+    visibility: visible;
+  }
 }
 
 @keyframes letter-rise {
