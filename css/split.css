@@ -5,24 +5,38 @@
  */
 
 /* Exactly one screen tall; js/scroll-pause.js holds it there for a moment (data-full-screen in index.html). */
+/* One grid for both panels: they share its three rows (title, photo, description) through subgrid, so the titles,
+   photos, and descriptions line up across both sides however the text wraps. Hovering a panel widens its column. */
 .split {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
   height: 100vh;
   height: 100svh;
+  transition: grid-template-columns 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.split:has(.panel-on-the-clock:hover),
+.split:has(.panel-on-the-clock:focus-visible) {
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+}
+
+.split:has(.panel-off-the-clock:hover),
+.split:has(.panel-off-the-clock:focus-visible) {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr);
 }
 
 /* Each panel stacks three rows: the title, the photo (filling the room left), and the description, which runs the
    full width of the panel. Both photos show at first; hovering one panel widens it and closes the other's photo. */
 .panel {
-  flex: 1 1 0;
+  grid-row: 1 / -1;
   position: relative;
   overflow: hidden;
   text-decoration: none;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: clamp(16px, 3vh, 32px);
+  grid-template-rows: subgrid;
+  row-gap: clamp(16px, 3vh, 32px);
   padding: calc(env(safe-area-inset-top, 0px) + var(--nav-height) + clamp(16px, 4vh, 48px)) var(--gutter) clamp(28px, 5vh, 64px);
-  transition: flex-grow 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .panel.panel-on-the-clock {
@@ -33,11 +47,6 @@
 .panel.panel-off-the-clock {
   background: var(--lavender);
   color: var(--on-lavender);
-}
-
-.panel:hover,
-.panel:focus-visible {
-  flex-grow: 1.7;
 }
 
 .panel:focus-visible {
@@ -52,8 +61,12 @@
   z-index: 1;
 }
 
+/* The description fills its shared row: the text starts right under the photo on both sides, and the link sits at
+   the bottom, so both line up whichever text is longer. */
 .panel-description {
-  align-self: end;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
   position: relative;
   z-index: 1;
   font-size: 17px;
@@ -64,7 +77,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 18px;
+  margin-top: auto;
+  padding-top: 18px;
   font-weight: 600;
 }
 

@@ -61,13 +61,14 @@
      room for them on one screen (css/split.css). */
 
   .panel {
-    gap: 20px;
+    row-gap: 20px;
     padding: calc(env(safe-area-inset-top, 0px) + var(--nav-height) + 16px) 16px 28px;
   }
 
-  .panel:hover,
-  .panel:focus-visible {
-    flex-grow: 1;
+  /* No widening on phones: both panels stay half the screen. */
+  .split:has(.panel:hover),
+  .split:has(.panel:focus-visible) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
   .panel-title {
@@ -79,7 +80,7 @@
   }
 
   .panel-action {
-    margin-top: 12px;
+    padding-top: 12px;
   }
 
   .experience-grid {
