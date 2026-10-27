@@ -349,7 +349,7 @@
       playWhenReady = true;
     }
     if (recording && recording.isDone) {
-      if (playWhenReady) {
+      if (playWhenReady && !Site.animationsPaused) {   // while paused, it waits for the site to resume
         playWhenReady = false;
         play();
       }
@@ -432,6 +432,11 @@
   playButton.addEventListener("click", () => {
     if (isPlaying) {
       pause();
+    } else if (Site.animationsPaused) {
+      Site.setAnimationsPaused(false);   // playing the demo resumes everything, so the top-bar button agrees
+      if (!isPlaying) {
+        play();
+      }
     } else {
       play();
     }
@@ -514,10 +519,34 @@
     playButton.textContent = frameIndex >= lastIndex ? "Replay" : "Play";
   });
 
-  // Pausing animations site-wide pauses the painter too; its own Play button still works.
+  // The demo and the top-bar pause button work as one: pausing site-wide pauses the demo, and resuming plays it
+  // again if it's on screen and was stopped partway (whichever button stopped it), or hasn't started yet. A
+  // finished demo stays on Replay.
+  let isOnScreen = false;
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver((entries) => {
+      entries.forEach((entry) => { isOnScreen = entry.isIntersecting; });
+    }, { threshold: 0.25 }).observe(canvas);
+  }
+
   Site.onPauseChange((isPaused) => {
-    if (isPaused && isPlaying) {
-      pause();
+    if (isPaused) {
+      if (isPlaying) {
+        pause();
+      }
+      return;
+    }
+    if (!isOnScreen || isPlaying) {
+      return;
+    }
+    if (recording && recording.isDone) {
+      const lastIndex = frameSchedules[renderRate].length - 1;
+      if (frameIndex < lastIndex) {
+        playWhenReady = false;
+        play();
+      }
+    } else {
+      ensureRecording(true);
     }
   });
 
