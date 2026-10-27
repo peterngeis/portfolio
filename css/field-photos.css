@@ -40,7 +40,7 @@
 .field-map {
   position: relative;
   margin: 0 var(--gutter);
-  max-width: 1100px;
+  max-width: min(1100px, calc(100% - 2 * var(--gutter)));
 }
 
 .usa-map {
@@ -143,6 +143,32 @@
 
 .field-photos-progress {
   display: none;
+}
+
+/* Reduced motion on wider screens: one row of photos, scaled together to fill it (js/field-photos.js sets
+   --still-photo-scale), each caption wrapping to its photo's width. */
+.field-photos.is-still-row .field-map-stage {
+  padding: calc(env(safe-area-inset-top, 0px) + var(--nav-height) + clamp(6px, 2vh, 20px)) 0 clamp(16px, 3vh, 36px);
+}
+
+.field-photos.is-still-row .field-photos-header {
+  margin-bottom: clamp(16px, 3vh, 32px);
+}
+
+.field-photos.is-still-row .field-photo-list {
+  flex-wrap: nowrap;
+  padding-top: clamp(16px, 3vh, 32px);
+}
+
+.field-photos.is-still-row .field-photo {
+  flex: none;
+  width: min-content;
+}
+
+.field-photos.is-still-row .field-photo img {
+  height: calc(var(--photo-height) * var(--still-photo-scale));
+  min-height: 0;
+  max-width: none;
 }
 
 /* ---------- The tour (motion on) ---------- */
@@ -272,4 +298,33 @@
   background: var(--lavender);
   transform-origin: left;
   transform: scaleX(0);
+}
+
+/* Short landscape screens (phones on their side): a compact heading with no subtitle, so the map and the open
+   photos get most of the height. Portrait and desktop are unchanged. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .field-photos.is-touring .field-photos-header {
+    padding-top: calc(env(safe-area-inset-top, 0px) + var(--nav-height) + 2px);
+  }
+
+  /* The heading stays for screen readers but isn't drawn, leaving the height to the map and the photos. */
+  .field-photos-header h2 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .field-photos-header p {
+    display: none;
+  }
+
+  /* Captions can run wider than a narrow photo, one line each, as long as they stay on screen. */
+  .field-photos.is-touring .field-photo figcaption {
+    width: max-content;
+    max-width: calc(100vw - 2 * var(--gutter));
+    white-space: nowrap;
+  }
 }

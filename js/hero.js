@@ -86,7 +86,8 @@
     heroName.style.fontSize = "100px";
     const widestLineWidth = Math.max(nameLines[0].getBoundingClientRect().width, nameLines[1].getBoundingClientRect().width);
     const heroStyle = getComputedStyle(heroElement);
-    const availableWidth = heroElement.clientWidth - parseFloat(heroStyle.paddingLeft) - parseFloat(heroStyle.paddingRight);
+    const widthShare = heroElement.classList.contains("has-radar-beside") ? SIDE_BY_SIDE.nameShare : 1;
+    const availableWidth = (heroElement.clientWidth - parseFloat(heroStyle.paddingLeft) - parseFloat(heroStyle.paddingRight)) * widthShare;
     let availableHeight = Site.viewportHeight - parseFloat(heroStyle.paddingTop) - parseFloat(heroStyle.paddingBottom)
       - heroMeta.offsetHeight - parseFloat(getComputedStyle(heroName).marginBottom) - 8;
     if (heroElement.classList.contains("has-radar-in-flow")) {
@@ -157,14 +158,57 @@
   const scanStartTime = performance.now();
 
   // Places the radar in the bottom left, just above the horizontal rule:
+  // Short landscape screens: Radar to the left scaled, and the name to right part.
+  const SIDE_BY_SIDE = {
+    maximumHeight: 500,   // screens no taller than this...
+    minimumAspect: 1.4,   // ...and at least this much wider than tall
+    nameShare: 0.56       // the share of the width the name keeps
+  };
+
+  function isShortLandscape() {
+    return Site.viewportHeight <= SIDE_BY_SIDE.maximumHeight && Site.viewportWidth >= Site.viewportHeight * SIDE_BY_SIDE.minimumAspect;
+  }
+
+  function placeRadarBesideName() {
+    heroElement.classList.add("has-radar-beside");
+    fitNameToScreen();
+    const heroBox = heroElement.getBoundingClientRect();
+    const heroStyle = getComputedStyle(heroElement);
+    const paddingLeft = parseFloat(heroStyle.paddingLeft);
+    const contentWidth = heroElement.clientWidth - paddingLeft - parseFloat(heroStyle.paddingRight);
+    const roomLeft = paddingLeft;
+    const roomWidth = contentWidth * (1 - SIDE_BY_SIDE.nameShare - 0.04);
+    const roomTop = parseFloat(heroStyle.paddingTop);
+    const roomHeight = heroMeta.getBoundingClientRect().top - heroBox.top - 14 - roomTop;
+
+    const baseFontSize = 12;
+    radar.style.fontSize = baseFontSize + "px";
+    const fontSize = Math.min(baseFontSize, baseFontSize * Math.min(roomWidth / (radar.offsetWidth || 1), roomHeight / (radar.offsetHeight || 1)));
+    if (fontSize < 5) {
+      return false;
+    }
+    radar.style.fontSize = fontSize + "px";
+    radar.style.left = (roomLeft + (roomWidth - radar.offsetWidth) / 2) + "px";
+    radar.style.top = (roomTop + (roomHeight - radar.offsetHeight) / 2) + "px";
+    return true;
+  }
+
   function placeRadar() {
     radar.style.display = "";
     radarBeams.style.display = "";
     radarTargetLayer.style.display = "";
     heroElement.classList.remove("has-radar-in-flow");
+    heroElement.classList.remove("has-radar-beside");
     revealSpacer.style.height = "0px";
     radar.style.left = "";
     radar.style.top = "";
+
+    if (isShortLandscape() && placeRadarBesideName()) {
+      radar.classList.add("is-placed");
+      measureEmitter();
+      return;
+    }
+    heroElement.classList.remove("has-radar-beside");
     fitNameToScreen();
 
     const firstLineBox = nameLines[0].getBoundingClientRect();
@@ -218,7 +262,12 @@
       }
     }
     radar.classList.add("is-placed");
+    measureEmitter();
+  }
 
+  // Where the beam leaves the ASCII drawing, in the hero's coordinates.
+  function measureEmitter() {
+    const heroBox = heroElement.getBoundingClientRect();
     const artBox = radarArt.getBoundingClientRect();
     const characterWidth = artBox.width / ART_COLUMN_COUNT;
     const lineHeight = artBox.height / ART_ROW_COUNT;
@@ -259,6 +308,17 @@
     const lineTop = heroMetaLine ? heroMetaLine.getBoundingClientRect().top - heroBox.top : heroBox.height;
     heroReveal.style.clipPath = "inset(0 0 " + Math.max(0, heroBox.height - lineTop).toFixed(1) + "px 0)";
     if (!revealPhoto) {
+      return;
+    }
+    if (heroElement.classList.contains("has-radar-beside")) {
+      // Short landscape screens: slid up so the PC to it sits centered.
+      const ratio = (parseFloat(revealPhoto.getAttribute("width")) || 4) / (parseFloat(revealPhoto.getAttribute("height")) || 3);
+      const coverWidth = Math.max(heroBox.width, lineTop * ratio);
+      const coverHeight = coverWidth / ratio;
+      const circleMiddle = heroBox.height * 0.26;
+      const slidTop = clamp(circleMiddle - PHOTO_SUBJECT.centerY * coverHeight, lineTop - coverHeight, 0);
+      revealPhoto.style.cssText = "inset: auto; max-width: none; left: " + ((heroBox.width - coverWidth) / 2).toFixed(1) + "px; top: "
+        + slidTop.toFixed(1) + "px; width: " + coverWidth.toFixed(1) + "px; height: " + coverHeight.toFixed(1) + "px;";
       return;
     }
     if (!heroElement.classList.contains("has-radar-in-flow")) {

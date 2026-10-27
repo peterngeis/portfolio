@@ -139,8 +139,7 @@ html.motion-enabled.is-hero-ready:not(.loader-seen) .loader {
   display: inline-block;
 }
 
-/* The letters wait below their line until the hero is ready (font loaded, layout final), then rise.
-   On a first visit they wait for the loader to slide away first. */
+/* The letters wait below their line until font loads, layout final, then rise. */
 html.motion-enabled.has-javascript .name-letter {
   transform: translateY(105%);
   visibility: hidden;
@@ -320,6 +319,12 @@ html.motion-enabled .cue-line {
 html:not(.has-javascript) .radar,
 html.is-hero-ready .radar.is-placed {
   opacity: 1;
+}
+
+/* Short landscape screens: the radar sits on the left and the name right  */
+.hero.has-radar-beside .hero-name {
+  width: 56%;
+  margin-left: auto;
 }
 
 .hero.has-radar-in-flow .radar {

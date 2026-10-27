@@ -27,6 +27,9 @@
   const MAP_WIDTH = 1000;   // the map drawing's grid an svg viewBox
   const MAP_HEIGHT = 627;
 
+  // Reduced motion only on screens at least minimumWidth wide, the photos stay in one row with the tallest.
+  const STILL = { minimumWidth: 760, tallestShare: 0.36 };
+
   const section = document.querySelector(".field-photos");
   const stage = section.querySelector(".field-map-stage");
   const mapArea = section.querySelector(".field-map");
@@ -52,7 +55,12 @@
   });
 
   if (!Site.motionEnabled || photos.length === 0) {
-    return;   // reduced motion: the stylesheet shows the map and the photos without the tour
+    // Reduced motion: The map and the row of photos sit one after the other, and the map is scaled to the
+    // heading.
+    if (photos.length > 0) {
+      Site.onMeasure(fitStillMap, 30);
+    }
+    return;
   }
   section.classList.add("is-touring");
 
@@ -63,6 +71,31 @@
       photo.image.decode().catch(() => {});
     }
   });
+
+  // Reduced motion only: fits the heading, the map, and the photos on one screen. 
+  function fitStillMap() {
+    const header = section.querySelector(".field-photos-header");
+    const photoList = section.querySelector(".field-photo-list");
+    const fitsOneRow = Site.viewportWidth >= STILL.minimumWidth;
+    section.classList.toggle("is-still-row", fitsOneRow);
+    if (!fitsOneRow) {
+      mapArea.style.width = "";   // phones: the photos wrap, so the map keeps its full width
+      return;
+    }
+    const listStyle = getComputedStyle(photoList);
+    const rowWidth = photoList.clientWidth - parseFloat(listStyle.paddingLeft) - parseFloat(listStyle.paddingRight)
+      - (parseFloat(listStyle.columnGap) || 0) * (photos.length - 1);
+    const widthPerUnit = photos.reduce((sum, photo) => sum + photo.heightShare * 100 * photo.aspect, 0);
+    const tallestUnits = Math.max(...photos.map((photo) => photo.heightShare * 100));
+    const scale = Math.min(rowWidth / widthPerUnit, Site.viewportHeight * STILL.tallestShare / tallestUnits);
+    section.style.setProperty("--still-photo-scale", scale.toFixed(3) + "px");
+
+    const stageStyle = getComputedStyle(stage);
+    const usedHeight = parseFloat(stageStyle.paddingTop) + parseFloat(stageStyle.paddingBottom)
+      + header.offsetHeight + parseFloat(getComputedStyle(header).marginBottom) + photoList.offsetHeight;
+    const roomHeight = Site.viewportHeight - usedHeight - 2;   // a little slack for rounding
+    mapArea.style.width = Math.max(180, roomHeight * MAP_WIDTH / MAP_HEIGHT) + "px";
+  }
 
   /* ---------- The timeline: fly to a place, open and close each of its photos, fly on ---------- */
 
