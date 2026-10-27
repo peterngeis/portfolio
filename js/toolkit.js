@@ -37,6 +37,9 @@
   }
 
   function updateTicker(now, framesElapsed) {
+    if (Site.animationsPaused) {
+      return;   // holds still while animations are paused
+    }
     const toolkitBox = toolkit.getBoundingClientRect();
     if (toolkitBox.bottom < 0 || toolkitBox.top > Site.viewportHeight) {
       return; // off screen: skip

@@ -28,6 +28,11 @@
     font-size: 14px;
   }
 
+  .motion-toggle {
+    width: 28px;
+    height: 28px;
+  }
+
   /* While the experience timeline is on screen (js/nav.js adds .is-solid), the top bar gets a solid
      background instead of the color-inversion effect, so it never overlaps the text scrolling underneath. */
   .nav {

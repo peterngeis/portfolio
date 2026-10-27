@@ -328,3 +328,8 @@
     white-space: nowrap;
   }
 }
+
+/* Holds still while animations are paused (js/core.js). */
+html.is-animation-paused .field-photos.is-touring .map-pin.is-current .map-pin-dot::after {
+  animation-play-state: paused;
+}

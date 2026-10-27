@@ -514,6 +514,13 @@
     playButton.textContent = frameIndex >= lastIndex ? "Replay" : "Play";
   });
 
+  // Pausing animations site-wide pauses the painter too; its own Play button still works.
+  Site.onPauseChange((isPaused) => {
+    if (isPaused && isPlaying) {
+      pause();
+    }
+  });
+
   /* ---------- Start the recording early, and play when the canvas is on screen ---------- */
 
   if ("IntersectionObserver" in window) {
@@ -531,7 +538,7 @@
     if (motionEnabled) {
       const autoplayObserver = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && !Site.animationsPaused) {   // while paused, it waits for its Play button
             ensureRecording(true);
             autoplayObserver.disconnect();
           }

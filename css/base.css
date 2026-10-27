@@ -239,6 +239,59 @@ h3 {
   border-color: #FFFFFF;
 }
 
+/* The pause button in the top bar, js/core.js: a small circle. Hidden when the 
+  device already asks for reduced motion. */
+.motion-toggle {
+  position: relative;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+html:not(.motion-enabled) .motion-toggle {
+  display: none;
+}
+
+.motion-toggle:hover {
+  background: #FFFFFF;
+  color: #000000;
+  border-color: #FFFFFF;
+}
+
+.motion-toggle-icon,
+.motion-toggle-icon::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+/* Pause: two bars. */
+.motion-toggle-icon {
+  width: 10px;
+  height: 11px;
+  transform: translate(-50%, -50%);
+  border-left: 3px solid currentColor;
+  border-right: 3px solid currentColor;
+  box-sizing: border-box;
+}
+
+/* Play: a triangle pointing right */
+html.is-animation-paused .motion-toggle-icon {
+  width: 0;
+  height: 0;
+  transform: translate(-35%, -50%);
+  border-left: 10px solid currentColor;
+  border-right: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+
 /* Shared by the experience timeline, the class demo, and the senior design section. */
 .bullet-list {
   list-style: none;

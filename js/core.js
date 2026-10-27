@@ -280,5 +280,65 @@ window.Site = (function () {
     requestAnimationFrame(animationLoop);
   });
 
+  /* ---------- Pausing animations ----------
+     The pause button in the top bar stops everything that moves on its own: Scroll-driven effects keep
+     working. The choice is remembered for the next visit. With reduced, the button is hidden in css/base.css */
+  const PAUSE_KEY = "animations-paused";
+  const pauseListeners = [];
+  let pausedAt = 0;
+  let pausedTotal = 0;
+
+  Site.animationsPaused = false;
+
+  // A clock for animations that stops while they're paused and picks up where it left off.
+  Site.animationNow = (now) => (Site.animationsPaused ? pausedAt : now) - pausedTotal;
+
+  // Calls listener(isPaused) whenever the visitor pauses or resumes.
+  Site.onPauseChange = (listener) => { pauseListeners.push(listener); };
+
+  Site.setAnimationsPaused = (isPaused) => {
+    if (isPaused === Site.animationsPaused) {
+      return;
+    }
+    const now = performance.now();
+    if (isPaused) {
+      pausedAt = now;
+    } else {
+      pausedTotal += now - pausedAt;
+    }
+    Site.animationsPaused = isPaused;
+    root.classList.toggle("is-animation-paused", isPaused);
+    try {
+      localStorage.setItem(PAUSE_KEY, String(isPaused));
+    } catch (error) {
+      // storage blocked: the choice just lasts for this visit
+    }
+    pauseListeners.forEach((listener) => listener(isPaused));
+  };
+
+  try {
+    if (Site.motionEnabled && localStorage.getItem(PAUSE_KEY) === "true") {
+      Site.animationsPaused = true;
+      pausedAt = performance.now();
+      root.classList.add("is-animation-paused");
+    }
+  } catch (error) {
+    // storage blocked: start playing
+  }
+
+  const pauseToggles = Array.from(document.querySelectorAll(".motion-toggle"));
+  function showPauseState() {
+    const label = Site.animationsPaused ? "Play animations" : "Pause animations";
+    pauseToggles.forEach((toggle) => {
+      toggle.setAttribute("aria-label", label);
+      toggle.title = label;
+    });
+  }
+  pauseToggles.forEach((toggle) => {
+    toggle.addEventListener("click", () => { Site.setAnimationsPaused(!Site.animationsPaused); });
+  });
+  Site.onPauseChange(showPauseState);
+  showPauseState();
+
   return Site;
 })();

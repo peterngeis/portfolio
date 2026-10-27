@@ -441,9 +441,14 @@
 
     // While idle, the target wanders slowly across the top of the screen.
     if (mode === "scan" && motionEnabled) {
-      const seconds = (now - scanStartTime) / 1000;
-      targetX = heroWidth * (0.58 + 0.28 * Math.sin(seconds * 0.33));
-      targetY = heroHeight * (0.26 + 0.14 * Math.sin(seconds * 0.51 + 1.1));
+      if (Site.animationsPaused) {
+        targetX = currentX;   // paused: the scan holds exactly where it is
+        targetY = currentY;
+      } else {
+        const seconds = (Site.animationNow(now) - scanStartTime) / 1000;
+        targetX = heroWidth * (0.58 + 0.28 * Math.sin(seconds * 0.33));
+        targetY = heroHeight * (0.26 + 0.14 * Math.sin(seconds * 0.51 + 1.1));
+      }
     }
     const isIdle = !motionEnabled && mode === "scan";
     radarBeams.classList.toggle("is-idle", isIdle);
@@ -470,7 +475,7 @@
 
     let reveal;
     if (motionEnabled) {
-      reveal = runPulseCycle(now, distance, unitX, unitY);
+      reveal = runPulseCycle(Site.animationNow(now), distance, unitX, unitY);   // stops while animations are paused
     } else {
       // Reduced motion: no pulses; the circle simply follows the cursor.
       pulseOut.style.opacity = 0;

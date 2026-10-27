@@ -352,3 +352,8 @@ html.motion-enabled .hotspot-marker::after {
 .hotspot-links a:hover {
   color: #5A43E0;
 }
+
+/* Holds still while animations are paused (js/core.js). */
+html.is-animation-paused .hotspot-marker::after {
+  animation-play-state: paused;
+}

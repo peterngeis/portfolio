@@ -343,6 +343,16 @@ html.is-hero-ready .radar.is-placed {
   width: 56ch;
 }
 
+/* The note's second line points to the pause button; with reduced motion there's nothing to pause. */
+html:not(.motion-enabled) .radar-note-pause {
+  display: none;
+}
+
+/* Looping animations hold still while animations are paused (js/core.js). */
+html.is-animation-paused .cue-line {
+  animation-play-state: paused;
+}
+
 .radar-note {
   display: block;
   margin-top: 1em;
