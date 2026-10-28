@@ -333,3 +333,22 @@
 html.is-animation-paused .field-photos.is-touring .map-pin.is-current .map-pin-dot::after {
   animation-play-state: paused;
 }
+
+/* ---------- Stepping through the tour ---------- */
+
+/* One scroll gesture moves one stop a snap point that can't be skipped defined in (js/field-photos.js),
+  The negative margin cancels the page's top padding for the nav bar. */
+html.has-tour-snap {
+  scroll-snap-type: y mandatory;
+}
+
+.field-photo-stop {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  scroll-margin-top: calc(-1 * (env(safe-area-inset-top, 0px) + var(--nav-height)));
+}

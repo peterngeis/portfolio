@@ -1,9 +1,9 @@
 /*
  * field-photos.js
  * "Field photos": a map of the United States with a pin where each photo was taken.
- * Scrolling down flies the map to each place, grows each photo out of its pin, shows the caption once the photo
- * is fully open, then shrinks it back into the pin before moving on. Only ordinary vertical scrolling drives it.
- * With reduced motion the map and photos are simply shown one after the other from field-photos.css.
+ * The tour moves in steps: one scroll gesture (a wheel burst, a trackpad flick, a swipe, an arrow key) moves one
+ * stop, and ensures no stop is skipped. Between stops the animation plays on its own clock: the map flies to the next
+ * place, the photo grows out of its pin, its caption shows, and it shrinks back before moving on. 
  */
 (function (Site) {
   "use strict";
@@ -11,18 +11,22 @@
 
   /* ---------- Settings you can tweak ---------- */
 
-  // Lengths are in screen heights of scrolling.
+  // The timeline: the lengths of its parts (in "screens", the unit the playback speed below is measured in).
   const TOUR = {
     introLength: 0.3,       // the whole map, before flying to the first place
-    flyLength: 0.5,         // flying from one place to another
+    flyLength: 1.1,         // flying from one place to another
     openLength: 0.28,       // a photo growing out of its pin
     holdLength: 0.3,        // the photo fully open, with its caption
     closeLength: 0.22,      // the photo shrinking back into its pin
     outroLength: 0.35,      // zooming back out to the whole map at the end
     zoom: 2.2,              // how far the map zooms in on a place (1 = the whole map)
     zoomPhone: 2.8,         // the same on screens narrower than 760 px
-    smallestPhoto: 0.05     // photo size when it sits inside its pin, as a fraction of its open size
-  };
+    smallestPhoto: 0.05,    // photo size when it sits inside its pin, as a fraction of its open size
+    stepLength: 0.7,        // scrolling between two stops, in screen heights (one gesture moves one stop)
+    secondsPerScreen: 0.65, // playback speed between stops: seconds per screen of the timeline above...
+    shortestMove: 0.4,      // Minimum move time
+    longestMove: 1.6        // Maximum move time
+    };
 
   const MAP_WIDTH = 1000;   // the map drawing's grid an svg viewBox
   const MAP_HEIGHT = 627;
@@ -124,10 +128,27 @@
     return 0;
   }
 
+  // The stops along the timeline each photo fully open.
+  const stops = [0, ...photos.map((photo, index) => openScreensFor(index)), totalLength];
+
+  // A snap point for each stop, plus one a screen before the first and one a screen after the last, so the tour
+  // scrolls in and out like the rest of the pages with css/field-photos.css.
+  function makeSnapPoint() {
+    const point = document.createElement("div");
+    point.className = "field-photo-stop";
+    point.setAttribute("aria-hidden", "true");
+    section.appendChild(point);
+    return point;
+  }
+  const stopPoints = stops.map(makeSnapPoint);
+  const beforePoint = makeSnapPoint();
+  const afterPoint = makeSnapPoint();
+
   /* ---------- Measuring ---------- */
 
   let sectionTop = 0;
-  let tourDistance = 1;     // pixels of scrolling the whole tour takes
+  let stepDistance = 1;     // pixels of scrolling between two stops
+  let tourDistance = 1;     // pixels of scrolling from the first stop to the last
   let areaWidth = 1;
   let areaHeight = 1;
   let areaTop = 0;          // the map area's position inside the stage
@@ -138,10 +159,13 @@
 
   function measureTour() {
     const screenHeight = Site.viewportHeight;
-    tourDistance = totalLength * screenHeight;
+    stepDistance = Math.round(TOUR.stepLength * screenHeight);
+    tourDistance = stepDistance * (stops.length - 1);
     section.style.height = (tourDistance + screenHeight) + "px";
     sectionTop = Site.documentTop(section);
-
+    stopPoints.forEach((point, index) => { point.style.top = (index * stepDistance) + "px"; });
+    beforePoint.style.top = (-screenHeight) + "px";
+    afterPoint.style.top = (tourDistance + screenHeight) + "px";
     areaWidth = mapArea.clientWidth;
     areaHeight = mapArea.clientHeight;
     areaTop = mapArea.offsetTop;
@@ -246,9 +270,46 @@
   let lastPhoto = null;
   let lastProgress = -1;
 
-  function updateTour() {
-    const distance = clamp(Site.scrollY - sectionTop, 0, tourDistance);
-    const state = tourStateAt(distance / Site.viewportHeight);
+  // Playback: the timeline position moves toward the stop the visitor is at (or snapping to), on its own clock.
+  let position = null;      // where the timeline is now (in screens); null until the first frame
+  let goalStop = 0;
+  let moveFrom = 0;
+  let moveTo = 0;
+  let moveStart = 0;
+  let moveDuration = 1;
+  let isSnapping = true;
+  let leavingUntil = 0;     // while scrolling out past the first or last stop, snapping stays off
+
+  function updateTour(now) {
+    const scrolled = window.scrollY - sectionTop;
+
+    // Snapping is on only while the tour is on screen (and not while the visitor is scrolling out of it), so the rest
+    // of the page scrolls freely.
+    const isInTour = isSnapping && now > leavingUntil && scrolled > -12 && scrolled < tourDistance + 12;
+    document.documentElement.classList.toggle("has-tour-snap", isInTour);
+
+    const stop = clamp(Math.round(scrolled / stepDistance), 0, stops.length - 1);
+    if (position === null) {
+      position = stops[stop];            // arriving mid-tour (a reload, a link): start right there
+      goalStop = stop;
+      moveTo = position;
+      moveStart = now - 100000;
+    } else if (stop !== goalStop) {
+      goalStop = stop;
+      moveFrom = position;
+      moveTo = stops[stop];
+      moveStart = now;
+      moveDuration = clamp(Math.abs(moveTo - moveFrom) * TOUR.secondsPerScreen, TOUR.shortestMove, TOUR.longestMove) * 1000;
+    }
+    if (scrolled < -Site.viewportHeight || scrolled > tourDistance + Site.viewportHeight) {
+      moveStart = now - moveDuration;   // off screen (a link jumped past, or the visitor is elsewhere): no need to play it
+    }
+    const t = clamp((now - moveStart) / moveDuration, 0, 1);
+    position = moveFrom + (moveTo - moveFrom) * easeInOut(t);
+    if (t >= 1) {
+      position = moveTo;
+    }
+    const state = tourStateAt(position);
 
     // Camera: the map is drawn so the focus point sits at the middle of the map area, scaled by the zoom.
     const scale = fitScale * state.zoom;
@@ -297,48 +358,139 @@
     }
     mapArea.style.opacity = (1 - 0.88 * openAmount).toFixed(3);   // fade the map (and the other pins' labels) behind an open photo
 
-    const progress = Math.round(distance / tourDistance * 1000) / 1000;
+    const progress = Math.round(position / totalLength * 1000) / 1000;
     if (progress !== lastProgress) {
       progressFill.style.transform = "scaleX(" + progress + ")";
       lastProgress = progress;
     }
   }
 
-  /* ---------- Settling onto a photo ---------- */
+  /* ---------- Wheels and keys: one gesture, one stop ----------
+     So inside the tour, a wheel gesture and the arrow, Page Up/Down, and space keys move exactly one stop, or one move into or out of the
+     tour at its ends. */
+  const WHEEL = {
+    quiet: 180,        // ms without wheel events that ends a gesture
+    notchGap: 150,     // ms: the quickest one mouse notch after another still counts as its own step
+    flickGap: 260,     // ms: the soonest after a step a trackpad surge can count as a new flick
+    surge: 1.5,        // a new flick: the wheel speeds up to at least this many times the last event...
+    surgeMinimum: 14   // Min pixels traversed.
+  };
+  let wheelGestureEnds = 0;
+  let wheelStepped = false;
+  let lastStepTime = -Infinity;
+  let lastWheelSize = 0;
+  let lastWheelDirection = 0;
 
-  // When scrolling comes to rest while a photo is partly open (still growing or already shrinking), the page
-  // glides onto it fully open, caption showing. When no photo is showing (the whole map, or flying between
-  // places), nothing pulls. Waits this long after the last scroll movement, so momentum finishes first.
-  const SETTLE_DELAY = 160;
-  let settleTimer = 0;
-  let isSnapping = true;
+  // The stop the page is gliding to after a step, while it's still on its way.
+  let headingTo = null;
+  let headingUntil = 0;
 
-  function settleOntoOpenPhoto() {
-    const distance = window.scrollY - sectionTop;
-    if (!isSnapping || distance < 0 || distance > tourDistance) {
-      return;
+  // The next stop in a direction: one stop on from where the page rests (or is already heading), or, when it's
+  // between stops (arriving from outside the tour), the first stop it reaches.
+  function nextStop(direction) {
+    if (headingTo !== null && performance.now() < headingUntil) {
+      return headingTo + direction;
     }
-    const state = tourStateAt(distance / Site.viewportHeight);
-    if (!state.photo || state.openAmount <= 0.001 || state.openAmount >= 0.999) {
-      return;   // no photo showing, or it's already fully open
+    const at = (window.scrollY - sectionTop) / stepDistance;
+    if (Math.abs(at - Math.round(at)) < 0.03) {
+      return Math.round(at) + direction;
     }
-    const goal = Math.round(sectionTop + openScreensFor(state.index) * Site.viewportHeight);
-    if (Math.abs(goal - window.scrollY) > 1) {
-      window.scrollTo({ top: goal, behavior: "smooth" });
-    }
+    return direction > 0 ? Math.ceil(at) : Math.floor(at);
   }
 
-  window.addEventListener("scroll", () => {
-    clearTimeout(settleTimer);
-    settleTimer = setTimeout(settleOntoOpenPhoto, SETTLE_DELAY);
-  }, { passive: true });
+  function isTourOnScreen() {
+    const scrolled = window.scrollY - sectionTop;
+    return isSnapping && scrolled > -12 && scrolled < tourDistance + 12;
+  }
 
-  // For testing: the scroll position (in pixels) where a photo is fully open, halfway through its hold; and a
-  // switch for settling, so a test can look at a photo mid-growth.
+  // Where one gesture in a direction (1 or -1) takes the page, in pixels from the tour's top, or null when it isn't the
+  // tour's section. 
+  function gestureTarget(direction) {
+    const scrolled = window.scrollY - sectionTop;
+    if (direction > 0 && scrolled < -12 && scrolled >= -stepDistance) {
+      return 0;
+    }
+    if (direction < 0 && scrolled > tourDistance + 12 && scrolled <= tourDistance + stepDistance) {
+      return tourDistance;
+    }
+    if (!isTourOnScreen()) {
+      return null;
+    }
+    const next = nextStop(direction);
+    if (next < 0 || next > stops.length - 1) {
+      leavingUntil = performance.now() + 900;   // snapping stays off while the page scrolls out
+      document.documentElement.classList.remove("has-tour-snap");
+      return next < 0 ? -Site.viewportHeight : tourDistance + Site.viewportHeight;
+    }
+    return next * stepDistance;
+  }
+
+  function moveForGesture(direction) {
+    const target = gestureTarget(direction);
+    if (target === null) {
+      return false;
+    }
+    const isStop = target >= 0 && target <= tourDistance;
+    headingTo = isStop ? Math.round(target / stepDistance) : null;
+    headingUntil = performance.now() + 700;
+    window.scrollTo({ top: sectionTop + target, behavior: "smooth" });
+    return true;
+  }
+
+  // A mouse notch: whole lines (Firefox) or whole notches of 120 (Chrome, Edge, Safari); a trackpad sends any size.
+  function isMouseNotch(event) {
+    return event.deltaMode === 1 || (event.wheelDeltaY !== undefined && event.wheelDeltaY !== 0 && event.wheelDeltaY % 120 === 0);
+  }
+
+  window.addEventListener("wheel", (event) => {
+    if (event.ctrlKey || Math.abs(event.deltaY) < Math.abs(event.deltaX)) {
+      return;   // pinch zoom or sideways
+    }
+    const now = performance.now();
+    const size = Math.abs(event.deltaY) * (event.deltaMode === 1 ? 16 : 1);
+    const direction = Math.sign(event.deltaY);
+    const sinceStep = now - lastStepTime;
+    const isNewGesture = now > wheelGestureEnds
+      || (isMouseNotch(event) && sinceStep > WHEEL.notchGap)
+      || (direction !== lastWheelDirection && sinceStep > WHEEL.notchGap)
+      || (size > lastWheelSize * WHEEL.surge && size >= WHEEL.surgeMinimum && sinceStep > WHEEL.flickGap);
+    wheelGestureEnds = now + WHEEL.quiet;
+    lastWheelSize = size;
+    lastWheelDirection = direction;
+    if (!isNewGesture && wheelStepped) {
+      event.preventDefault();   // the rest of a gesture that already moved (trackpad momentum)
+      return;
+    }
+    wheelStepped = moveForGesture(direction);
+    if (wheelStepped) {
+      lastStepTime = now;
+      event.preventDefault();
+    }
+  }, { passive: false });
+
+  const STEP_KEYS = { ArrowDown: 1, PageDown: 1, " ": 1, ArrowUp: -1, PageUp: -1 };
+  window.addEventListener("keydown", (event) => {
+    const direction = STEP_KEYS[event.key];
+    if (!direction || event.altKey || event.ctrlKey || event.metaKey) {
+      return;
+    }
+    if (event.target.closest && event.target.closest("input, textarea, select, button, a, [contenteditable]")) {
+      return;   // keys meant for a control
+    }
+    if (moveForGesture(event.key === " " && event.shiftKey ? -1 : direction)) {
+      event.preventDefault();
+    }
+  });
+
+  // For testing: the scroll position (in pixels) of a photo's stop; whether the playback has reached its stop; and a
+  // switch for snapping.
   Site.fieldPhotos = {
     photoCount: photos.length,
     scrollPositionForPhoto(index) {
-      return Math.round(sectionTop + openScreensFor(index) * Site.viewportHeight);
+      return Math.round(sectionTop + (index + 1) * stepDistance);
+    },
+    isAtStop() {
+      return position === moveTo;
     },
     setSnapping(isOn) {
       isSnapping = isOn;

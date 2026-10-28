@@ -12,7 +12,7 @@ The page is a stack of sections. Each section has one stylesheet and, where it n
 | Landing: loader, name, radar pulses that reveal the build photo | `css/hero.css` | `js/hero.js` |
 | Introduction | `css/statement.css` | `js/statement.js` |
 | Scroll pauses (hold a frame still on screen) | `css/scroll-pause.css` | `js/scroll-pause.js` |
-| Field photos (map tour, settles onto open photos) | `css/field-photos.css` | `js/field-photos.js` |
+| Field photos (map tour, one stop per scroll gesture) | `css/field-photos.css` | `js/field-photos.js` |
 | On the clock / Off the clock panels (full screen) | `css/split.css` | |
 | Experience timeline | `css/experience.css` | `js/experience.js` |
 | Class demo (painter) | `css/class-demo.css` | `js/painter.js` |
