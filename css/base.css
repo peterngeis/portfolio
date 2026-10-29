@@ -214,6 +214,21 @@ h3 {
 
 .nav-links a {
   text-decoration: none;
+  white-space: nowrap;
+}
+
+/* Links always take their bold width, so the current one doesn't shift or wrap the bar. */
+.nav-links a[data-label] {
+  display: inline-grid;
+}
+
+.nav-links a[data-label]::after {
+  content: attr(data-label);
+  font-weight: 700;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .nav-links a:not(.pill):hover {

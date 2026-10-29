@@ -334,10 +334,7 @@ html.is-animation-paused .field-photos.is-touring .map-pin.is-current .map-pin-d
   animation-play-state: paused;
 }
 
-/* ---------- Stepping through the tour ---------- */
-
-/* One scroll gesture moves one stop a snap point that can't be skipped defined in (js/field-photos.js),
-  The negative margin cancels the page's top padding for the nav bar. */
+/* Tour stops: one gesture moves one stop. Snapping is on only inside the tour (js/field-photos.js). */
 html.has-tour-snap {
   scroll-snap-type: y mandatory;
 }
@@ -350,5 +347,5 @@ html.has-tour-snap {
   pointer-events: none;
   scroll-snap-align: start;
   scroll-snap-stop: always;
-  scroll-margin-top: calc(-1 * (env(safe-area-inset-top, 0px) + var(--nav-height)));
+  scroll-margin-top: calc(-1 * (env(safe-area-inset-top, 0px) + var(--nav-height)));   /* cancels the nav padding */
 }

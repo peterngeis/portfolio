@@ -196,6 +196,13 @@
 }
 
 /* Very narrow phones (iPhone SE and similar): tighten the top bar so it stays on one line. */
+/* Narrow phones: tighter links so the bar stays on one line. */
+@media (max-width: 380px) {
+  .nav-links {
+    gap: 12px;
+  }
+}
+
 @media (max-width: 360px) {
   .brand {
     font-size: 15px;
