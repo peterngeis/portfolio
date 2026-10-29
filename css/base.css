@@ -5,6 +5,16 @@
  * Change the palette in :root. --paper is the background, --ink the main text, --lavender the accent.
  */
 
+/* Epilogue from Fontshare, served from fonts/ (SIL Open Font License, fonts/Epilogue-OFL.txt). One variable file
+   covers every weight the page uses (500 to 800). */
+@font-face {
+  font-family: "Epilogue";
+  src: url("../fonts/Epilogue-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --paper: #000000;
   --surface: #0B0A0F;
@@ -39,6 +49,9 @@
 
 html {
   scroll-padding-top: calc(env(safe-area-inset-top, 0px) + var(--nav-height));
+  /* iPhones enlarge text when turned sideways unless told not to; the layout already sizes itself. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -106,6 +119,11 @@ h3 {
 :focus-visible {
   outline: 2px solid var(--lavender);
   outline-offset: 3px;
+}
+
+/* Sections that in-page links move the keyboard to (js/core.js) take focus without an outline. */
+section[tabindex="-1"]:focus {
+  outline: none;
 }
 
 /* Content width grows on large monitors (1400px up to about 2080px) so sections fill big screens the way they fill a laptop. */
@@ -188,27 +206,33 @@ h3 {
   mix-blend-mode: difference;
 }
 
+/* Everything in the bar is sized from --nav-type (phones change it in css/responsive.css). If the bar still wouldn't
+   fit on one line with the font that actually loaded, js/nav.js lowers --nav-fit just enough. */
 .nav .wrap {
+  --nav-type: 15px;
   height: var(--nav-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
   max-width: none;
+  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));    /* clear of the notch with the phone sideways */
+  padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+  font-size: calc(var(--nav-type) * var(--nav-fit, 1));
 }
 
 .brand {
   font-weight: 700;
   text-decoration: none;
   letter-spacing: -0.01em;
-  font-size: 17px;
+  font-size: calc(17em / 15);   /* 17px beside 15px links */
+  white-space: nowrap;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
   gap: clamp(18px, 2.4vw, 34px);
-  font-size: 15px;
   font-weight: 500;
 }
 
@@ -244,6 +268,7 @@ h3 {
 }
 
 .nav .pill {
+  font-size: 1em;
   min-height: 38px;
   padding: 0 16px;
 }

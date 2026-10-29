@@ -20,12 +20,15 @@ window.Site = (function () {
   // because sections above it finish sizing themselves after the browser first jumps there.
   const HASH_SETTLE_DURATION = 1500;
 
-  // In-page links to sections farther away than this many screens (the top bar, the On the clock / Off the clock
-  // panels) jump straight there behind a quick fade, instead of smooth-scrolling through everything in between,
-  // which would play the field photo map tour, the build photo zoom, and the rest along the way.
+  // In-page links (the top bar, the On the clock / Off the clock panels) slide to their section when it's close,
+  // the way scrolling there would. A link that would scroll through a section marked data-scroll-scene in index.html
+  // (the field photo map tour, the build photo zoom), or that is far away, jumps straight there behind a quick fade
+  // instead, so nothing plays on the way. Either way the site moves the page itself and updates the address without
+  // a navigation, rather than handing the link to the browser.
   const LONG_JUMP = {
-    screens: 1.5,
-    fadeTime: 170   // milliseconds; matches the fade in css/base.css
+    screens: 1.5,         // closer than this always slides
+    slideScreens: 3,      // up to this far slides too, if no scroll scene is in the way
+    fadeTime: 170         // milliseconds; matches the fade in css/base.css
   };
 
   // The landing screen waits for the web font before it appears, so the name never visibly resizes.
@@ -183,6 +186,63 @@ window.Site = (function () {
     window.addEventListener(eventName, () => { visitorHasInteracted = true; }, { passive: true, once: true });
   });
 
+  const scrollScenes = Array.from(document.querySelectorAll("[data-scroll-scene]"));
+
+  // Whether scrolling from here to the target would pass through a scroll scene (the target itself doesn't count).
+  function crossesScrollScene(target) {
+    const targetTop = target.getBoundingClientRect().top;
+    const from = Math.min(0, targetTop) + 2;
+    const to = Math.max(0, targetTop) - 2;
+    return scrollScenes.some((scene) => {
+      if (scene === target || scene.contains(target)) {
+        return false;
+      }
+      const box = scene.getBoundingClientRect();
+      return box.top < to && box.bottom > from;
+    });
+  }
+
+  // A slide: eases in and out, longer for longer distances. Any wheel, touch, or key stops it where it is.
+  let linkSlide = 0;
+
+  function stopLinkSlide() {
+    cancelAnimationFrame(linkSlide);
+    linkSlide = 0;
+  }
+
+  ["wheel", "touchstart", "keydown"].forEach((eventName) => {
+    window.addEventListener(eventName, stopLinkSlide, { passive: true });
+  });
+
+  function slideTo(goal) {
+    stopLinkSlide();
+    const from = window.scrollY;
+    const duration = Site.clamp(350 + 250 * Math.abs(goal - from) / Site.viewportHeight, 400, 900);
+    const startTime = performance.now();
+    const frame = (now) => {
+      const t = Site.clamp((now - startTime) / duration, 0, 1);
+      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      window.scrollTo({ top: Math.round(from + (goal - from) * eased), behavior: "instant" });
+      linkSlide = t < 1 ? requestAnimationFrame(frame) : 0;
+    };
+    linkSlide = requestAnimationFrame(frame);
+  }
+
+  // Where the page stops for a link's target: its top just under the top bar (the page's scroll-padding).
+  function scrollGoalFor(target) {
+    const padding = parseFloat(getComputedStyle(root).scrollPaddingTop) || 0;
+    const largest = document.documentElement.scrollHeight - window.innerHeight;
+    return Site.clamp(Math.round(target.getBoundingClientRect().top + window.scrollY - padding), 0, Math.max(0, largest));
+  }
+
+  // The target becomes the starting point for the keyboard, as it would after the browser followed the link.
+  function moveFocusTo(target) {
+    if (!target.hasAttribute("tabindex")) {
+      target.setAttribute("tabindex", "-1");
+    }
+    target.focus({ preventScroll: true });
+  }
+
   document.addEventListener("click", (event) => {
     const link = event.target.closest ? event.target.closest('a[href^="#"]') : null;
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
@@ -191,20 +251,23 @@ window.Site = (function () {
     const id = decodeURIComponent(link.getAttribute("href").slice(1));
     const target = id ? document.getElementById(id) : null;
     if (!target || !Site.motionEnabled) {
-      return;
-    }
-    if (Math.abs(target.getBoundingClientRect().top) < Site.viewportHeight * LONG_JUMP.screens) {
-      return;   // nearby: the smooth scroll is fine
+      return;   // reduced motion: the browser jumps there itself
     }
     event.preventDefault();
+    if (location.hash !== "#" + id) {
+      history.replaceState(null, "", "#" + id);
+    }
+    moveFocusTo(target);
+    const distance = Math.abs(target.getBoundingClientRect().top);
+    if (distance < Site.viewportHeight * LONG_JUMP.screens
+      || (distance < Site.viewportHeight * LONG_JUMP.slideScreens && !crossesScrollScene(target))) {
+      slideTo(scrollGoalFor(target));
+      return;
+    }
+    stopLinkSlide();
     root.classList.add("is-jumping");
     setTimeout(() => {
-      if (location.hash !== "#" + id) {
-        history.pushState(null, "", "#" + id);
-      }
-      root.style.scrollBehavior = "auto";
-      target.scrollIntoView({ behavior: "instant", block: "start" });
-      root.style.scrollBehavior = "";
+      window.scrollTo({ top: scrollGoalFor(target), behavior: "instant" });
       Site.scrollY = window.scrollY;   // and no smoothing through the sections in between
       requestAnimationFrame(() => { root.classList.remove("is-jumping"); });
     }, LONG_JUMP.fadeTime);

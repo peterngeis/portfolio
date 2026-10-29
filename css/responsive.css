@@ -23,9 +23,28 @@
     display: none;
   }
 
+  /* The bar scales with the screen width: 13px links on the narrowest phones, 14px on an iPhone 14, 15px from about
+     420px wide, with the name and the spacing in proportion. */
+  .nav .wrap {
+    --nav-type: clamp(13px, 3.6vw, 15px);
+    gap: 1.5em;
+  }
+
+  .brand {
+    font-size: 1.2em;
+  }
+
   .nav-links {
-    gap: 16px;
-    font-size: 14px;
+    gap: 1.1em;
+  }
+
+  /* The current chapter is underlined but not bold, so the links keep their width. */
+  .nav-links a.is-current {
+    font-weight: inherit;
+  }
+
+  .nav-links a[data-label]::after {
+    content: none;
   }
 
   .motion-toggle {
@@ -192,24 +211,5 @@
   *::after {
     transition: none !important;
     animation: none !important;
-  }
-}
-
-/* Very narrow phones (iPhone SE and similar): tighten the top bar so it stays on one line. */
-/* Narrow phones: tighter links so the bar stays on one line. */
-@media (max-width: 380px) {
-  .nav-links {
-    gap: 12px;
-  }
-}
-
-@media (max-width: 360px) {
-  .brand {
-    font-size: 15px;
-  }
-
-  .nav-links {
-    gap: 12px;
-    font-size: 13px;
   }
 }

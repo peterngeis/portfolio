@@ -173,11 +173,14 @@
 
 /* ---------- The tour (motion on) ---------- */
 
+/* The stage fills whatever height the browser shows (dvh follows a phone's toolbars sliding in and out), so nothing
+   from the next section shows under the map. js/field-photos.js makes the section long enough for the tallest. */
 .field-photos.is-touring .field-map-stage {
   position: sticky;
   top: 0;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -208,6 +211,11 @@
   left: 0;
   top: 0;
   transition: opacity 0.4s ease;
+}
+
+/* While a place's photos are open, the pins step back so their labels don't show through. */
+.field-photos.is-touring.is-showing-photos .map-pin {
+  opacity: 0;
 }
 
 .field-photos.is-touring .map-pin-dot {
@@ -300,6 +308,65 @@
   transform: scaleX(0);
 }
 
+/* A place with several photos (Boulder) opens them together: each keeps its title, and the place and year are said
+   once underneath (js/field-photos.js adds .field-group-caption). The place stays in each caption for screen readers. */
+.field-photos.is-touring .field-photo.is-grouped figcaption {
+  margin-top: 8px;
+}
+
+.field-photos.is-touring .field-photo.is-grouped figcaption b {
+  font-size: 14px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.field-photos.is-touring .field-photo.is-grouped figcaption span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.field-group-caption {
+  display: none;
+}
+
+.field-photos.is-touring .field-group-caption {
+  display: block;
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  top: 0;
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.field-photos.is-touring .field-group-caption.is-open {
+  opacity: 1;
+}
+
+/* While the tour holds the screen, a finger moves the tour rather than the page (js/field-photos.js), so the browser
+   is told not to scroll here. pinch-zoom, where supported, keeps zooming the page possible. */
+html.is-on-field-tour .field-photos.is-touring {
+  touch-action: none;
+  touch-action: pinch-zoom;
+}
+
+@media (max-width: 760px) {
+  .field-photos.is-touring .field-photo.is-grouped figcaption b {
+    font-size: 13px;
+  }
+}
+
 /* Short landscape screens (phones on their side): a compact heading with no subtitle, so the map and the open
    photos get most of the height. Portrait and desktop are unchanged. */
 @media (orientation: landscape) and (max-height: 500px) {
@@ -321,8 +388,9 @@
     display: none;
   }
 
-  /* Captions can run wider than a narrow photo, one line each, as long as they stay on screen. */
-  .field-photos.is-touring .field-photo figcaption {
+  /* A single photo's caption can run wider than a narrow photo, one line, as long as it stays on screen. (A group's
+     titles keep to their own photos.) */
+  .field-photos.is-touring .field-photo:not(.is-grouped) figcaption {
     width: max-content;
     max-width: calc(100vw - 2 * var(--gutter));
     white-space: nowrap;
@@ -332,20 +400,4 @@
 /* Holds still while animations are paused (js/core.js). */
 html.is-animation-paused .field-photos.is-touring .map-pin.is-current .map-pin-dot::after {
   animation-play-state: paused;
-}
-
-/* Tour stops: one gesture moves one stop. Snapping is on only inside the tour (js/field-photos.js). */
-html.has-tour-snap {
-  scroll-snap-type: y mandatory;
-}
-
-.field-photo-stop {
-  position: absolute;
-  left: 0;
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  scroll-margin-top: calc(-1 * (env(safe-area-inset-top, 0px) + var(--nav-height)));   /* cancels the nav padding */
 }
