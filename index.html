@@ -34,9 +34,8 @@
     }
   })();
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300..900&display=swap">
+<!-- Epilogue Fontshare, SIL Open Font License: fonts/Epilogue-OFL.txt -->
+<link rel="preload" href="fonts/Epilogue-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <!-- Styles: base first, then one file per page section in page order, and responsive.css last so its rules win. -->
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/hero.css">
@@ -107,7 +106,7 @@
   |               |                      |(X)(X)|======|
   |_______________|_____________________|¯¯¯¯¯¯¯¯¯¯¯¯¯¯
      ||  ||  ||                        ||
-     (@) (@) (@)                      _||_</span><span class="radar-note">Not representative of radar performance. Just a fun animation.<span class="radar-note-pause"><br>Pause animations with the top bar button<br>or in device accessibility settings.</span></span></div>
+     (@) (@) (@)                      _||_</span><span class="radar-note">Not representative of radar performance. Just a fun animation.<span class="radar-note-pause"><br>Pause animations with the top bar button or in device accessibility settings.</span></span></div>
     <svg class="radar-beams" id="radar-beams" aria-hidden="true" focusable="false">
       <line class="beam-track" x1="0" y1="0" x2="0" y2="0"/>
       <line class="beam-pulse-out" x1="0" y1="0" x2="0" y2="0"/>
@@ -143,9 +142,11 @@
   </section>
 
   <!-- ========== Field photos: a map of where each photo was taken ==========
-       Scrolling down flies to each place on the map and opens its photos one at a time (js/field-photos.js).
-       Each .field-photo names its map pin with data-place -->
-  <section class="field-photos" aria-labelledby="field-photos-heading">
+       Scrolling flies the map to each place in the order of the photos below and opens that place's photos together
+       (js/field-photos.js). Each .field-photo names its map pin with data-place; photos of one place sit next to each
+       other. The order runs west to east (White Sands, Boulder, Boston) so the map makes one short hop and one long
+       flight. data-scroll-scene: links never smooth-scroll through this section (js/core.js). -->
+  <section class="field-photos" data-scroll-scene aria-labelledby="field-photos-heading">
     <div class="field-map-stage">
       <div class="field-photos-header wrap">
         <h2 id="field-photos-heading" class="display-type">Field photos</h2>
@@ -376,10 +377,6 @@
           <img src="images/portrait.webp" width="409" height="507" alt="Peter smiling in a cowboy hat in front of green field equipment">
           <figcaption><b>On site</b><span>White Sands, 2024</span></figcaption>
         </figure>
-        <figure class="field-photo" data-place="boston" style="--photo-height: 48">
-          <img src="images/headlamp.webp" width="1400" height="1528" alt="Peter in a headlamp and headphones working inside a PC case">
-          <figcaption><b>Building a PC</b><span>Boston, 2022</span></figcaption>
-        </figure>
         <figure class="field-photo" data-place="boulder" style="--photo-height: 54">
           <img src="images/foam.webp" width="825" height="1100" alt="A foam disk compressed between two steel platens of a testing machine">
           <figcaption><b>Foam compression testing</b><span>Boulder, 2021</span></figcaption>
@@ -395,6 +392,10 @@
         <figure class="field-photo" data-place="boulder" style="--photo-height: 46">
           <img src="images/launch.webp" width="259" height="553" alt="A model rocket launching over a grassy field">
           <figcaption><b>Flight test</b><span>Boulder, 2021</span></figcaption>
+        </figure>
+        <figure class="field-photo" data-place="boston" style="--photo-height: 48">
+          <img src="images/headlamp.webp" width="1400" height="1528" alt="Peter in a headlamp and headphones working inside a PC case">
+          <figcaption><b>Building a PC</b><span>Boston, 2022</span></figcaption>
         </figure>
       </div>
       <div class="field-photos-progress" aria-hidden="true"><span class="field-photos-progress-fill"></span></div>
@@ -605,7 +606,7 @@
   </section>
 
   <!-- ========== My current build: zooming photo with part points (.hotspot) ========== -->
-  <section class="build-photo" id="off-the-clock" aria-labelledby="off-the-clock-heading">
+  <section class="build-photo" id="off-the-clock" data-scroll-scene aria-labelledby="off-the-clock-heading">
     <div class="stage">
       <div class="frame">
         <!-- The chapter heading sits inside the frame at its top left, under the top bar, like the other section

@@ -12,7 +12,7 @@ The page is a stack of sections. Each section has one stylesheet and, where it n
 | Landing: loader, name, radar pulses that reveal the build photo | `css/hero.css` | `js/hero.js` |
 | Introduction | `css/statement.css` | `js/statement.js` |
 | Scroll pauses (hold a frame still on screen) | `css/scroll-pause.css` | `js/scroll-pause.js` |
-| Field photos (map tour, one stop per scroll gesture) | `css/field-photos.css` | `js/field-photos.js` |
+| Field photos (map tour tied to scrolling: lands gently, one place per gesture, a place's photos open together, carries out to the split) | `css/field-photos.css` | `js/field-photos.js` |
 | On the clock / Off the clock panels (full screen) | `css/split.css` | |
 | Experience timeline | `css/experience.css` | `js/experience.js` |
 | Class demo (painter) | `css/class-demo.css` | `js/painter.js` |
@@ -26,13 +26,14 @@ The page is a stack of sections. Each section has one stylesheet and, where it n
 | Phone and tablet layouts, reduced motion | `css/responsive.css` (keep last) | |
 | Top bar: current chapter, background on phones | | `js/nav.js` |
 | Videos that play while on screen (drop test, keyboard) | | `js/video.js` |
-| Shared helpers and the one animation loop | | `js/core.js` |
+| Shared helpers, the one animation loop, in-page links (the site slides or fade-jumps itself; no browser navigation) | | `js/core.js` |
 
 Other files:
 
 ```
 index.html            all the page content, with a labeled comment above each section
 images/               webp or mp4
+fonts/                Epilogue variable font (Fontshare) and its SIL Open Font License
 favicon.svg           
 favicon.ico           
 apple-touch-icon.png  
