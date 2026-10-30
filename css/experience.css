@@ -7,6 +7,7 @@
 /* The split panels above have no padding of their own, so this section supplies the full 2 x gap. */
 .experience {
   padding: calc(var(--section-gap) * 2) 0 var(--section-gap);
+  scroll-margin-top: calc(-1 * (env(safe-area-inset-top, 0px) + var(--nav-height)));   /* links land flush at the top */
 }
 
 .experience-heading {

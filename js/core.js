@@ -228,9 +228,9 @@ window.Site = (function () {
     linkSlide = requestAnimationFrame(frame);
   }
 
-  // Where the page stops for a link's target: its top just under the top bar (the page's scroll-padding).
+  // Where the page stops for a link's target as just under the top bar.
   function scrollGoalFor(target) {
-    const padding = parseFloat(getComputedStyle(root).scrollPaddingTop) || 0;
+    const padding = (parseFloat(getComputedStyle(root).scrollPaddingTop) || 0) + (parseFloat(getComputedStyle(target).scrollMarginTop) || 0);
     const largest = document.documentElement.scrollHeight - window.innerHeight;
     return Site.clamp(Math.round(target.getBoundingClientRect().top + window.scrollY - padding), 0, Math.max(0, largest));
   }
