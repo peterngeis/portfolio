@@ -8,13 +8,13 @@
  * once, so the map zooms in three times rather than six.
  *
  * Moving through it. The whole map, each place, and the whole map again are "moments".
- *   Arriving: a fling headed for the section is caught and brought down gently onto the whole map.
  *   Inside: a finger drags the camera directly. On release it glides on to the next moment (a flick) or settles on
  *     the nearer one (a slow drag); never more than one moment per gesture. The browser doesn't scroll the page
  *     under a finger here (touch-action in css/field-photos.css), so nothing else moves while the map is held.
  *   Leaving: one more pull past either end carries the page out to the next scroll pause (below the map, the
  *     On the clock / Off the clock panels, held full screen).
  *   A wheel gesture or a key press moves one moment.
+ *   Scrolling into the section is left to the browser (no entry fling catch).
  * With reduced motion the map and photos are simply shown one after the other.
  */
 (function (Site) {
@@ -46,8 +46,6 @@
     shortestGlide: 300,     // ms
     longestGlide: 750,      // ms, from moment to moment
     longestCarry: 1100,     // ms, carrying the page into or out of the tour
-    momentumTime: 480,      // ms: a released fling would travel about its speed times this
-    magnet: 0.35,           // screens: a fling that would stop this close before the tour lands on it too
     wheelBand: 0.6,         // screens before either end where a wheel gesture or key heading in glides onto it
     settleDelay: 160        // ms of stillness before the page settles onto the nearest moment
   };
@@ -606,32 +604,9 @@
     }, null);
   }
 
-  // Ending a fling. Safari ends a fling when a script scrolls the page; Chrome on Android keeps it going unless the
-  // page briefly can't scroll, so there the page is locked for a few frames.
-  const endsFlingOnScroll = /iP(hone|od|ad)/.test(navigator.userAgent)
-    || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
-
-  function endFling() {
-    if (endsFlingOnScroll) {
-      return;
-    }
-    root.style.overflow = "hidden";
-    let framesLeft = 3;
-    const unlock = () => {
-      framesLeft -= 1;
-      if (framesLeft > 0) {
-        requestAnimationFrame(unlock);
-        return;
-      }
-      root.style.overflow = "";
-    };
-    requestAnimationFrame(unlock);
-  }
-
   /* ---------- Touch ---------- */
 
   let touch = null;         // the current one-finger touch
-  let lastSwipeEnd = -Infinity;
 
   // The finger's speed over its last 100 ms, in px per ms (positive: finger moving up, page moving down).
   function releaseSpeed(samples, endTime) {
@@ -705,9 +680,8 @@
     const speed = releaseSpeed(ended.samples, event.timeStamp);
     if (ended.onTour) {
       releaseOnTour(ended, speed);
-    } else if (ended.moved) {
-      releaseOffTour(speed);
     }
+    // Swipes that start outside the section are left to native scroll (no entry fling catch).
   }
 
   window.addEventListener("touchend", endTouch, { passive: true });
@@ -748,36 +722,10 @@
     glidePage(placeOutside(direction), speed);
   }
 
-  // A swipe elsewhere on the page. If its fling is headed into the tour (or would stop just short of it), take it
-  // over now and bring it down gently onto the near end.
-  function releaseOffTour(speed) {
-    lastSwipeEnd = performance.now();
-    const scrollY = window.scrollY;
-    const first = sectionTop;
-    const last = sectionTop + tourDistance;
-    const travel = speed * FEEL.momentumTime;
-    const magnet = FEEL.magnet * unit;
-    if (isInTour(scrollY)) {
-      // Dragged into the tour from outside: settle onto a moment, in the direction it was going.
-      endFling();
-      const position = clamp(positionOfPage(scrollY), 0, totalLength);
-      const direction = Math.abs(speed) >= FEEL.flick ? Math.sign(speed) : 0;
-      glidePage(pageOfPosition(chooseMoment(position, position - Math.sign(speed) * 0.001, direction)), speed);
-      return;
-    }
-    if (speed > 0 && scrollY < first && scrollY + travel >= first - magnet) {
-      endFling();
-      glidePage(first, speed);
-    } else if (speed < 0 && scrollY > last && scrollY + travel <= last + magnet) {
-      endFling();
-      glidePage(last, speed);
-    }
-  }
-
   /* ---------- The page scrolling by other means ----------
-     A fling that reached the tour anyway (one the release above misjudged) is caught where it crossed in; and when
-     scrolling stops partway between moments (a scroll bar, a keyboard, a screen reader) the page settles onto the
-     nearest one. */
+     When scrolling stops partway between moments (scrollbar, keyboard, screen reader, or residual
+     native momentum inside the section) the page settles onto the nearest one. Entry into the
+     section is not intercepted — native scroll carries in. */
   let previousScrollY = window.scrollY;
   let scrollDirection = 0;
   let settleTimer = 0;
@@ -794,22 +742,6 @@
     }
     clearTimeout(settleTimer);
     settleTimer = setTimeout(settleOntoMoment, FEEL.settleDelay);
-    if (performance.now() - lastSwipeEnd > 4000) {
-      return;
-    }
-    const first = sectionTop;
-    const last = sectionTop + tourDistance;
-    if (wasAt < first - 1 && scrollY >= first && scrollY <= last) {
-      endFling();
-      const position = positionOfPage(scrollY);
-      glidePage(pageOfPosition(position <= TOUR.overviewHold ? 0 : chooseMoment(position, 0, 1)), 0);
-      lastSwipeEnd = -Infinity;
-    } else if (wasAt > last + 1 && scrollY <= last && scrollY >= first) {
-      endFling();
-      const position = positionOfPage(scrollY);
-      glidePage(pageOfPosition(position >= totalLength - TOUR.overviewHold ? totalLength : chooseMoment(position, totalLength, -1)), 0);
-      lastSwipeEnd = -Infinity;
-    }
   }, { passive: true });
 
   let mouseButtonDown = false;
