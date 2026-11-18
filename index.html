@@ -9,8 +9,8 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Peter Geis, Systems Engineer</title>
 <meta name="description" content="Peter Geis is a systems engineer who integrates and tests advanced phased array radars, validates embedded control software, and builds test automation.">
-<!-- Runs before the page draws: marks JavaScript as available, checks reduced motion, and sets 
-  a flag per to load once per visit. -->
+<!-- Runs before the page draws: marks JavaScript as available, checks reduced motion, starts the landing screen's
+  safety net, and sets a flag so the loader plays only once per visit. -->
 <script>
   (function () {
     const root = document.documentElement;
@@ -23,6 +23,11 @@
     } catch (error) {
       // Older browsers without matchMedia simply get no motion.
     }
+
+    // Safety net: if the deferred scripts are slow to arrive (a weak phone connection), the loader leaves and the
+    // name rises anyway after 4.5 s. js/hero.js adds the same class as soon as the landing screen is laid out, so
+    // on a normal load this does nothing. It lives here because this script always runs before the loader shows.
+    setTimeout(function () { root.classList.add("is-hero-ready"); }, 4500);
 
     try {
       if (sessionStorage.getItem("loader-seen")) {
@@ -77,8 +82,9 @@
 </header>
 
 <main>
-  <!-- ========== Landing: name, ASCII radar (edit the drawing inside .radar-art), role line ========== -->
-  <section class="hero" id="top" aria-labelledby="hero-heading">
+  <!-- ========== Landing: name, ASCII radar (edit the drawing inside .radar-art), role line ==========
+       data-offscreen-pause: the looping scroll cue holds still while this section is out of sight (js/core.js). -->
+  <section class="hero" id="top" data-offscreen-pause aria-labelledby="hero-heading">
     <!-- The letters sit side by side with no whitespace between them, so no gaps appear in the name. -->
     <h1 class="hero-name display-type" id="hero-heading" aria-label="Peter Geis">
       <span class="name-line" aria-hidden="true"><span class="name-line-text"><span class="name-letter" style="--letter-index:0">P</span><span class="name-letter" style="--letter-index:1">e</span><span class="name-letter" style="--letter-index:2">t</span><span class="name-letter" style="--letter-index:3">e</span><span class="name-letter" style="--letter-index:4">r</span></span></span>
@@ -129,7 +135,7 @@
         <p class="statement-text" id="statement-text">I’m a systems engineer who finds the root cause of complex radar failures and gets the right people aligned to fix them.</p>
         <div class="statement-grid">
           <figure class="statement-figure">
-            <img src="images/sensoji.webp" width="1600" height="1066" alt="Peter grinning and holding up a Tombow MONO mechanical pencil and a small package in a covered shopping street hung with red banners">
+            <img src="images/sensoji.webp" width="1600" height="1066" alt="Peter grinning and holding up a Tombow MONO mechanical pencil and a small package in a covered shopping street hung with red banners" loading="lazy">
             <figcaption class="caption">Near Sensō-ji, Tokyo (home 2007–2010), with my favorite Tombow MONO.</figcaption>
           </figure>
           <div class="statement-copy">
@@ -374,27 +380,27 @@
       </div>
       <div class="field-photo-list">
         <figure class="field-photo" data-place="white-sands" style="--photo-height: 50">
-          <img src="images/portrait.webp" width="409" height="507" alt="Peter smiling in a cowboy hat in front of green field equipment">
+          <img src="images/portrait.webp" width="409" height="507" alt="Peter smiling in a cowboy hat in front of green field equipment" loading="lazy">
           <figcaption><b>On site</b><span>White Sands, 2024</span></figcaption>
         </figure>
         <figure class="field-photo" data-place="boston" style="--photo-height: 48">
-          <img src="images/headlamp.webp" width="1400" height="1528" alt="Peter in a headlamp and headphones working inside a PC case">
+          <img src="images/headlamp.webp" width="1400" height="1528" alt="Peter in a headlamp and headphones working inside a PC case" loading="lazy">
           <figcaption><b>Building a PC</b><span>Boston, 2022</span></figcaption>
         </figure>
         <figure class="field-photo" data-place="boulder" style="--photo-height: 54">
-          <img src="images/foam.webp" width="825" height="1100" alt="A foam disk compressed between two steel platens of a testing machine">
+          <img src="images/foam.webp" width="825" height="1100" alt="A foam disk compressed between two steel platens of a testing machine" loading="lazy">
           <figcaption><b>Foam compression testing</b><span>Boulder, 2021</span></figcaption>
         </figure>
         <figure class="field-photo" data-place="boulder" style="--photo-height: 44">
-          <img src="images/assembly.webp" width="1200" height="900" alt="Hands assembling a launch platform on a clear plate">
+          <img src="images/assembly.webp" width="1200" height="900" alt="Hands assembling a launch platform on a clear plate" loading="lazy">
           <figcaption><b>Assembling a launch platform</b><span>Boulder, 2021</span></figcaption>
         </figure>
         <figure class="field-photo" data-place="boulder" style="--photo-height: 52">
-          <img src="images/vibe.webp" width="750" height="1000" alt="A small sensor assembly bolted to a vibration table">
+          <img src="images/vibe.webp" width="750" height="1000" alt="A small sensor assembly bolted to a vibration table" loading="lazy">
           <figcaption><b>Vibration table setup</b><span>Boulder, 2021</span></figcaption>
         </figure>
         <figure class="field-photo" data-place="boulder" style="--photo-height: 46">
-          <img src="images/launch.webp" width="259" height="553" alt="A model rocket launching over a grassy field">
+          <img src="images/launch.webp" width="259" height="553" alt="A model rocket launching over a grassy field" loading="lazy">
           <figcaption><b>Flight test</b><span>Boulder, 2021</span></figcaption>
         </figure>
       </div>
@@ -408,12 +414,12 @@
   <section class="split" aria-label="Two sides of my work">
     <a class="panel panel-on-the-clock" href="#on-the-clock">
       <span class="panel-title display-type">On the<br>clock</span>
-      <span class="panel-photo"><img class="panel-image" src="images/exploded.webp" width="480" height="960" alt=""></span>
+      <span class="panel-photo"><img class="panel-image" src="images/exploded.webp" width="480" height="960" alt="" loading="lazy"></span>
       <span class="panel-description">Integration and test, product sustainment, and a Sandia National Laboratories project.<span class="panel-action">See my experience</span></span>
     </a>
     <a class="panel panel-off-the-clock" href="#off-the-clock">
       <span class="panel-title display-type">Off the<br>clock</span>
-      <span class="panel-photo"><img class="panel-image" src="images/weld_tall.webp" width="366" height="735" alt=""></span>
+      <span class="panel-photo"><img class="panel-image" src="images/weld_tall.webp" width="366" height="735" alt="" loading="lazy"></span>
       <span class="panel-description">Liquid-cooled PCs, a ski winch, a go-kart, and more…<span class="panel-action">See my builds</span></span>
     </a>
   </section>
@@ -570,7 +576,7 @@
       <!-- Phones get the team photo on its own, uncropped. Wider screens get the full banner with the Flatirons. -->
       <picture>
         <source media="(max-width: 760px)" srcset="images/team-photo.webp" width="1200" height="766">
-        <img src="images/banner.webp" width="2400" height="719" alt="Our seven-person senior design team posing on a lawn at CU Boulder, with the Flatirons behind">
+        <img src="images/banner.webp" width="2400" height="719" alt="Our seven-person senior design team posing on a lawn at CU Boulder, with the Flatirons behind" loading="lazy">
       </picture>
       <figcaption class="caption">Team 8 at CU Boulder. <a href="https://www.colorado.edu/mechanical/team-08-launch-prevention-device-and-payload-protection-device" target="_blank" rel="noopener">See our project page</a></figcaption>
     </figure>
@@ -594,9 +600,9 @@
         </div>
         <div class="scroll-pause" data-pause="payload">
         <div class="payload-media">
-          <figure class="tall"><img src="images/mts.webp" width="825" height="1100" alt="An MTS Exceed universal testing machine next to its control computer"><figcaption class="caption">MTS load frame used for the foam tests</figcaption></figure>
-          <figure class="square"><img src="images/stack.webp" width="839" height="1000" alt="Stacked sensor boards between two white plastic plates"><figcaption class="caption">Sensor assembly</figcaption></figure>
-          <figure class="fill-height"><span class="media-box"><video src="images/foam-drop.mp4" poster="images/foam-drop-poster.webp" width="720" height="480" muted loop playsinline controls preload="metadata" data-autoplay aria-label="Drop tower test: a steel plate falls onto a foam disk, compresses it, and rebounds"></video></span><figcaption class="caption">Drop tower impact test</figcaption></figure>
+          <figure class="tall"><img src="images/mts.webp" width="825" height="1100" alt="An MTS Exceed universal testing machine next to its control computer" loading="lazy"><figcaption class="caption">MTS load frame used for the foam tests</figcaption></figure>
+          <figure class="square"><img src="images/stack.webp" width="839" height="1000" alt="Stacked sensor boards between two white plastic plates" loading="lazy"><figcaption class="caption">Sensor assembly</figcaption></figure>
+          <figure class="fill-height"><span class="media-box"><video src="images/foam-drop.mp4" poster="images/foam-drop-poster.webp" width="720" height="480" muted loop playsinline controls preload="none" data-autoplay aria-label="Drop tower test: a steel plate falls onto a foam disk, compresses it, and rebounds"></video></span><figcaption class="caption">Drop tower impact test</figcaption></figure>
         </div>
         </div>
       </article>
@@ -605,7 +611,7 @@
   </section>
 
   <!-- ========== My current build: zooming photo with part points (.hotspot) ========== -->
-  <section class="build-photo" id="off-the-clock" data-scroll-scene aria-labelledby="off-the-clock-heading">
+  <section class="build-photo" id="off-the-clock" data-scroll-scene data-offscreen-pause aria-labelledby="off-the-clock-heading">
     <div class="stage">
       <div class="frame">
         <!-- The chapter heading sits inside the frame at its top left, under the top bar, like the other section
@@ -615,7 +621,7 @@
           <h2 class="chapter-title display-type" id="off-the-clock-heading">Off the clock</h2>
         </div>
         <div class="cover">
-          <img src="images/room.webp" width="2200" height="1650" alt="A white liquid-cooled PC glowing lavender on a stand by a sunny window, next to a desk and monitor">
+          <img src="images/room.webp" width="2200" height="1650" alt="A white liquid-cooled PC glowing lavender on a stand by a sunny window, next to a desk and monitor" loading="lazy">
           <div class="hotspot" style="left: 36.8%; top: 55.5%; --hotspot-index: 1">
             <button class="hotspot-button" type="button" aria-expanded="false" aria-controls="hotspot-card-1" aria-label="NZXT N7 B550">
               <span class="hotspot-marker" aria-hidden="true"></span>
@@ -742,68 +748,25 @@
     <div class="scroll-pause" data-pause="winch" data-full-screen>
       <div class="winch-frame">
         <div class="wrap">
-          <!-- Phrases in this line open small trays below it (js/tinker-trays.js): each is a .tinker-trigger whose
-               aria-controls names its tray and data-peek names its hover preview (screens with a mouse). They're links
-               acting as buttons so the phrases wrap across lines like the rest of the sentence. -->
-          <p class="builds-intro">In my “tinker time,” I <a class="tinker-trigger" href="#componentry" role="button" aria-expanded="false" aria-controls="componentry" data-peek="componentry-peek">model small componentry</a>, build custom liquid-cooled PCs for young professionals, and <a class="tinker-trigger" href="#band" role="button" aria-expanded="false" aria-controls="band" data-peek="band-peek">help my roommate’s band with audio engineering</a>.</p>
-          <!-- The band and the ski winch share one layout: the main photo on the left at one shared height (--ratio is its
-               width / height), and on the right a title, a line, and an action. The keyboard uses the same title and line
-               sizes above its gallery of renders (css/builds.css, "Projects"). -->
-          <!-- The keyboard: its title and line above two columns of renders; the column widths are set so both
-               columns end at the same height (css/builds.css). The exploded clip is a draft-quality render, so it sits
-               at the bottom of the left column rather than leading. -->
-          <div class="tinker-tray" id="componentry" hidden>
-            <div class="project-text componentry-text">
-              <p class="project-title">Keyboard model</p>
-              <p class="project-line">A project working up toward my CSWA (Certified SOLIDWORKS Associate), using both surface and solid body modeling.</p>
-            </div>
-            <div class="componentry">
-              <div class="componentry-column">
-                <figure>
-                  <img src="images/keyboard-full.webp" width="1200" height="556" alt="The whole black keyboard, rendered from a low angle" loading="lazy">
-                  <figcaption class="caption">The full board</figcaption>
-                </figure>
-                <figure>
-                  <video src="images/keyboard-explode.mp4" poster="images/keyboard-explode-poster.webp" width="720" height="558" muted loop playsinline controls preload="none" data-autoplay aria-label="A keyboard I modeled coming apart into its keycaps, switches, plate, and case, then back together"></video>
-                  <figcaption class="caption">Exploded view</figcaption>
-                </figure>
-              </div>
-              <div class="componentry-column">
-                <figure>
-                  <img src="images/keyboard-profile.webp" width="1200" height="556" alt="The black keyboard rendered in profile, seen low from the end" loading="lazy">
-                  <figcaption class="caption">Profile view</figcaption>
-                </figure>
-                <figure>
-                  <img src="images/keyboard-detail.webp" width="1200" height="675" alt="Close-up render of sculpted black keycaps on their stems at the edge of the keyboard" loading="lazy">
-                  <figcaption class="caption">Keycap and stem detail</figcaption>
-                </figure>
-              </div>
-            </div>
-          </div>
-          <div class="tinker-tray project band" id="band" hidden>
-            <div class="project-media" style="--ratio: 0.75">
-              <img src="images/band.webp" width="768" height="1024" alt="The band at home among their instruments, with a dog in a green sweater in front" loading="lazy">
-            </div>
-            <div class="project-text">
-              <p class="project-title">Dogs in Green</p>
-              <p class="project-line">I did the sound engineering, mixing, and studio setup for their 2023 album <i>Artificial Baby</i>, and helped run their small shows.</p>
-              <a class="project-action" href="https://open.spotify.com/track/75Q1ohpPoDaoib7PHnl7px" target="_blank" rel="noopener">Listen to “Ms. Don McLean” on Spotify</a>
-            </div>
-          </div>
+          <!-- Phrases in this line open the side pane, like the ski winch card (js/drawer.js; data-drawer names the
+               <template> at the end of this file), and data-peek names each one's hover preview (screens with a mouse,
+               js/tinker-peeks.js). They're links acting as buttons so the phrases wrap across lines like the rest of
+               the sentence. -->
+          <p class="builds-intro">In my “tinker time,” I <a class="tinker-trigger" href="#builds" role="button" aria-haspopup="dialog" data-drawer="drawer-componentry" data-peek="componentry-peek">model small componentry</a>, build custom liquid-cooled PCs for young professionals, and <a class="tinker-trigger" href="#builds" role="button" aria-haspopup="dialog" data-drawer="drawer-band" data-peek="band-peek">help my roommate’s band with audio engineering</a>.</p>
           <!-- Hover previews (mouse only): several images crossfade; each takes its image's shape. -->
           <div class="tinker-peek" id="componentry-peek" aria-hidden="true">
-            <img src="images/keyboard-profile.webp" width="1200" height="556" alt="" class="is-shown">
-            <img src="images/keyboard-detail.webp" width="1200" height="675" alt="">
-            <img src="images/keyboard-full.webp" width="1200" height="556" alt="">
+            <img src="images/keyboard-profile.webp" width="1200" height="556" alt="" class="is-shown" loading="lazy">
+            <img src="images/keyboard-detail.webp" width="1200" height="675" alt="" loading="lazy">
+            <img src="images/keyboard-full.webp" width="1200" height="556" alt="" loading="lazy">
           </div>
           <div class="tinker-peek" id="band-peek" aria-hidden="true">
-            <img src="images/band.webp" width="768" height="1024" alt="" class="is-shown">
+            <img src="images/band.webp" width="768" height="1024" alt="" class="is-shown" loading="lazy">
           </div>
           <!-- On screens with a mouse, hovering swaps to the second photo. Touch screens keep the first photo. -->
           <button class="card project" type="button" data-drawer="drawer-winch" aria-haspopup="dialog">
             <span class="card-image project-media" style="--ratio: 1.175">
-              <img class="photo-default" src="images/w_final.webp" width="846" height="720" alt="">
-              <img class="photo-hover" src="images/w_weld.webp" width="1200" height="675" alt="">
+              <img class="photo-default" src="images/w_final.webp" width="846" height="720" alt="" loading="lazy">
+              <img class="photo-hover" src="images/w_weld.webp" width="1200" height="675" alt="" loading="lazy">
             </span>
             <span class="project-text">
               <span class="project-title">Ski winch and go‑kart</span>
@@ -896,7 +859,6 @@
 
 <template id="drawer-pc">
   <h3 class="display-type" id="drawer-title">Liquid-cooled PCs</h3>
-  <p class="feature-meta">Personal projects</p>
   <p>My current build runs a Ryzen 9 5900X and an EVGA RTX 3080 Ti with a custom liquid cooling loop in a Lian Li O11 Dynamic EVO. My builds integrate hardware from several manufacturers, and I enjoy the artistic aspects of hand-bent PMMA tubing and 3D-printed brackets. To tune CPU, GPU, and memory overclocking curves, I used AMD Ryzen Master and EVGA Precision X1 while simulating machine learning and CAD workloads.</p>
   <p>I also help engineers, designers, and computer scientists troubleshoot and assemble their own builds.</p>
   <div class="links">
@@ -904,16 +866,15 @@
     <a class="pill" href="https://www.youtube.com/shorts/RhgdRbpLL8Y" target="_blank" rel="noopener"><span class="play-icon" aria-hidden="true"></span>Watch the boot sequence</a>
   </div>
   <div class="drawer-photos">
-    <figure class="wide natural"><img src="images/pc_old.webp" width="908" height="1210" alt="A white liquid-cooled PC glowing pink and lavender, seen through its glass side panel"><figcaption class="caption">Liquid-cooled build, lit up</figcaption></figure>
-    <figure class="wide"><img src="images/pc_gpu.webp" width="1000" height="750" alt="A bare graphics card with thermal pads, next to an open white case"><figcaption class="caption">Preparing the GPU for its water block</figcaption></figure>
-    <figure><img src="images/bends.webp" width="750" height="1000" alt="Clear prototype tube bends"><figcaption class="caption">Prototype PMMA bends</figcaption></figure>
-    <figure><img src="images/pc_bracket.webp" width="473" height="1000" alt="A 3D printer printing a perforated white bracket"><figcaption class="caption">Printing the drain valve bracket</figcaption></figure>
+    <figure class="wide natural"><img src="images/pc_old.webp" width="908" height="1210" alt="A white liquid-cooled PC glowing pink and lavender, seen through its glass side panel" loading="lazy"><figcaption class="caption">Liquid-cooled build, lit up</figcaption></figure>
+    <figure class="wide"><img src="images/pc_gpu.webp" width="1000" height="750" alt="A bare graphics card with thermal pads, next to an open white case" loading="lazy"><figcaption class="caption">Preparing the GPU for its water block</figcaption></figure>
+    <figure><img src="images/bends.webp" width="750" height="1000" alt="Clear prototype tube bends" loading="lazy"><figcaption class="caption">Prototype PMMA bends</figcaption></figure>
+    <figure><img src="images/pc_bracket.webp" width="473" height="1000" alt="A 3D printer printing a perforated white bracket" loading="lazy"><figcaption class="caption">Printing the drain valve bracket</figcaption></figure>
   </div>
 </template>
 
 <template id="drawer-winch">
   <h3 class="display-type" id="drawer-title">Ski winch and go-kart</h3>
-  <p class="feature-meta">Personal projects</p>
   <p>A gas-powered winch for towing skiers and snowboarders into jumps. It pulls a 180 lb rider past 40 mph using a 6 HP engine, a variable torque converter, a bail brake, and a high-strength steel frame from recycled material.</p>
   <p>A local skate shop, THURO, rented it for ski, snowboard, and skateboard video shoots. I later built a go-kart around the same drivetrain with recycled fence posts!</p>
   <div class="links">
@@ -922,9 +883,31 @@
     <a class="pill" href="https://www.youtube.com/watch?v=3_H4XHzEYOA" target="_blank" rel="noopener"><span class="play-icon" aria-hidden="true"></span>Watch the go-kart run</a>
   </div>
   <div class="drawer-photos">
-    <figure class="wide"><img src="images/w_weld.webp" width="1200" height="675" alt="Welding a steel tube frame in a shop"><figcaption class="caption">Welding the frame</figcaption></figure>
-    <figure><img src="images/snow.webp" width="574" height="366" alt="The winch in deep snow"><figcaption class="caption">First test</figcaption></figure>
-    <figure><img src="images/w_front.webp" width="614" height="841" alt="Front view of the finished winch with tow straps"><figcaption class="caption">Final assembly</figcaption></figure>
+    <figure class="wide"><img src="images/w_weld.webp" width="1200" height="675" alt="Welding a steel tube frame in a shop" loading="lazy"><figcaption class="caption">Welding the frame</figcaption></figure>
+    <figure><img src="images/snow.webp" width="574" height="366" alt="The winch in deep snow" loading="lazy"><figcaption class="caption">First test</figcaption></figure>
+    <figure><img src="images/w_front.webp" width="614" height="841" alt="Front view of the finished winch with tow straps" loading="lazy"><figcaption class="caption">Final assembly</figcaption></figure>
+  </div>
+</template>
+
+<template id="drawer-componentry">
+  <h3 class="display-type" id="drawer-title">Keyboard model</h3>
+  <p>A project working up toward my CSWA (Certified SOLIDWORKS Associate), using both surface and solid body modeling.</p>
+  <div class="drawer-photos">
+    <figure class="wide natural"><img src="images/keyboard-full.webp" width="1200" height="556" alt="The whole black keyboard, rendered from a low angle" loading="lazy"><figcaption class="caption">The full board</figcaption></figure>
+    <figure class="wide natural"><img src="images/keyboard-profile.webp" width="1200" height="556" alt="The black keyboard rendered in profile, seen low from the end" loading="lazy"><figcaption class="caption">Profile view</figcaption></figure>
+    <figure class="wide natural"><img src="images/keyboard-detail.webp" width="1200" height="675" alt="Close-up render of sculpted black keycaps on their stems at the edge of the keyboard" loading="lazy"><figcaption class="caption">Keycap and stem detail</figcaption></figure>
+    <figure class="wide natural"><video src="images/keyboard-explode.mp4" poster="images/keyboard-explode-poster.webp" width="720" height="558" muted loop playsinline controls preload="none" data-autoplay aria-label="A keyboard I modeled coming apart into its keycaps, switches, plate, and case, then back together"></video><figcaption class="caption">Exploded view</figcaption></figure>
+  </div>
+</template>
+
+<template id="drawer-band">
+  <h3 class="display-type" id="drawer-title">Dogs in Green</h3>
+  <p>I did the sound engineering, mixing, and studio setup for their 2023 album <i>Artificial Baby</i>, and helped run their small shows.</p>
+  <div class="links">
+    <a class="pill" href="https://open.spotify.com/track/75Q1ohpPoDaoib7PHnl7px" target="_blank" rel="noopener"><span class="play-icon" aria-hidden="true"></span>Listen to “Ms. Don McLean” on Spotify</a>
+  </div>
+  <div class="drawer-photos">
+    <figure class="wide natural"><img src="images/band.webp" width="768" height="1024" alt="The band at home among their instruments, with a dog in a green sweater in front" loading="lazy"><figcaption class="caption">The band at home</figcaption></figure>
   </div>
 </template>
 

@@ -1,14 +1,10 @@
 /*
  * drawer.js
- * The slide-in side pane. Any button with data-drawer="template-id" opens it; the named <template> in
- * index.html e.g. "Build details"
+ * The slide-in side pane. Anything with data-drawer="template-id" opens it, filled from that <template> at the end of
+ * index.html: "Build details", the ski winch card, and the keyboard and band phrases in the tinker time line.
  *
- * The page behind is never resized or re-laid out while the pane is open. (Locking it with overflow: hidden,
- * as before, made iPhones shift the page and replay the scroll effects on close: a zoom out and back in.)
- * Instead, scrolling over the dimmed backdrop is cancelled, the pane's own scrolling never spills onto the page,
- * and closing returns to the exact scroll position and the button that opened it.
  */
-(function () {
+(function (Site) {
   "use strict";
 
   const root = document.documentElement;
@@ -20,12 +16,54 @@
   let pageScrollY = 0;        // where the page was when it opened
   let touchStartY = 0;
 
+  /* ---------- Loading a pane's media ahead of time ----------
+     The first hover, focus, or press that opens a pane loads its photos into the browser's cache and starts each clip loading in a
+     video element kept for that pane. Opening the pane uses those same video elements, so a clip that has started
+     loading, or has played before, state is saved. */
+  const preparedVideos = new Map();
+
+  function prepareDrawer(templateId) {
+    if (preparedVideos.has(templateId)) {
+      return preparedVideos.get(templateId);
+    }
+    const template = document.getElementById(templateId);
+    if (!template) {
+      return [];
+    }
+    template.content.querySelectorAll("img").forEach((image) => {
+      const photo = new Image();
+      photo.src = image.getAttribute("src");
+    });
+    const videos = Array.from(template.content.querySelectorAll("video")).map((templateVideo) => {
+      // importNode, a plain copy still belongs to the template's document, which can't load
+      // media, and the clip would fail ("source not supported") and stay broken even after joining the page.
+      const video = document.importNode(templateVideo, true);
+      video.preload = "auto";
+      video.load();
+      return video;
+    });
+    preparedVideos.set(templateId, videos);
+    return videos;
+  }
+
   function openDrawer(trigger) {
-    const template = document.getElementById(trigger.getAttribute("data-drawer"));
+    const templateId = trigger.getAttribute("data-drawer");
+    const template = document.getElementById(templateId);
     if (!template) {
       return;
     }
-    drawerBody.replaceChildren(template.content.cloneNode(true));
+    // Swap the template clips for loaded, then let js/video.js play them while on screen.
+    const content = template.content.cloneNode(true);
+    const videos = prepareDrawer(templateId);
+    content.querySelectorAll("video").forEach((video, index) => {
+      if (videos[index]) {
+        video.replaceWith(videos[index]);
+      }
+    });
+    drawerBody.replaceChildren(content);
+    if (Site && Site.watchVideo) {
+      videos.forEach(Site.watchVideo);
+    }
     openedFrom = trigger;
     pageScrollY = window.scrollY;
     if (typeof drawer.showModal === "function") {
@@ -39,7 +77,25 @@
   }
 
   document.querySelectorAll("[data-drawer]").forEach((trigger) => {
-    trigger.addEventListener("click", () => openDrawer(trigger));
+    const prepare = () => { prepareDrawer(trigger.getAttribute("data-drawer")); };
+    trigger.addEventListener("pointerenter", prepare);
+    trigger.addEventListener("focus", prepare);
+    trigger.addEventListener("pointerdown", prepare);
+
+    trigger.addEventListener("click", (event) => {
+      event.preventDefault();
+      openDrawer(trigger);
+    });
+
+    // Links acting as buttons open on Space too
+    if (trigger.tagName === "A") {
+      trigger.addEventListener("keydown", (event) => {
+        if (event.key === " ") {
+          event.preventDefault();
+          trigger.click();
+        }
+      });
+    }
   });
 
   document.getElementById("drawer-close").addEventListener("click", () => { drawer.close(); });
@@ -109,4 +165,4 @@
     window[method]("touchmove", blockTouchScroll, { passive: false });
     window[method]("keydown", blockScrollKeys);
   }
-})();
+})(window.Site);

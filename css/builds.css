@@ -1,13 +1,14 @@
 /*
  * builds.css
- * More builds (the ski winch and go-kart card) and the slide-in side pane that it and "Build details" open.
- * Script: js/drawer.js
+ * More builds (the tinker time line and the ski winch and go-kart card) and the slide-in side pane that they and
+ * "Build details" open.
+ * Scripts: js/drawer.js (the side pane), js/tinker-peeks.js (the line's hover previews)
  */
 
 /* The build photo above has no black space of its own, so this section supplies the full 2 x gap. */
 /* The tinker time line and the ski winch and go-kart card share one screen, centered under the top bar, and
-   hold for a moment (data-full-screen in index.html). It's at least one screen tall: an open tray makes it taller,
-   and then it scrolls normally. The photo is sized to leave room for the line above it, at its own shape, so
+   hold for a moment (data-full-screen in index.html). Everything in it opens in the side pane, so it stays one
+   screen tall. The photo is sized to leave room for the line above it, at its own shape, so
    the whole winch is always in frame. --line-room is the height the line (and, on phones, the title under the
    photo) needs. */
 .winch-frame {
@@ -41,7 +42,7 @@
   line-height: 1.6;
 }
 
-/* Phrases in the tinker time line that open a tray: buttons that read as part of the sentence,
+/* Phrases in the tinker time line that open a side pane: buttons that read as part of the sentence,
    underlined in lavender. */
 .tinker-trigger {
   color: inherit;
@@ -52,36 +53,14 @@
   text-underline-offset: 4px;
 }
 
-.tinker-trigger:hover,
-.tinker-trigger[aria-expanded="true"] {
+.tinker-trigger:hover {
   color: var(--lavender);
 }
 
-/* The trays they open, under the line. */
-.tinker-tray {
-  margin: 0 0 clamp(28px, 4vh, 48px);
-}
-
-.tinker-tray[hidden] {
-  display: none;
-}
-
-html.motion-enabled .tinker-tray:not([hidden]) {
-  animation: tinker-tray-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-@keyframes tinker-tray-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-}
-
-/* ---------- Projects: the band and the ski winch share one layout (the keyboard shares its type sizes) ----------
-   The main photo on the left, every one at the same height (--project-media, set on .winch-frame so it
-   leaves room for the line above), its width from its own shape (--ratio on the element, width / height) so
-   nothing is cropped. On the right: a title, a line, and an action, at the same sizes for all three, matching the
-   tinker time line. */
+/* ---------- Projects: the ski winch card ----------
+   The photo on the left at a height that leaves room for the line above (--project-media, set on .winch-frame),
+   its width from its own shape (--ratio on the element, width / height) so nothing is cropped. On the right: a
+   title, a line, and an action, at the same sizes as the tinker time line. */
 .project {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -166,44 +145,6 @@ a.project-action:focus-visible {
 
 a.project-action:hover::before {
   background: currentColor;
-}
-
-/* The keyboard: its title and line above two columns of renders. Left column: the full board and the exploded clip;
-   right column: the profile view and the close-up. The right column is about 1.21 times as wide, which makes both
-   columns end at the same height. */
-.componentry-text {
-  margin-bottom: 18px;
-}
-
-.componentry {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.21fr);
-  gap: 14px;
-  align-items: start;
-  max-width: 1000px;
-}
-
-.componentry-column {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.componentry figure {
-  margin: 0;
-}
-
-.componentry img,
-.componentry video {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 4px;
-}
-
-.componentry video {
-  aspect-ratio: 720 / 558;
-  background: #FFFFFF;
 }
 
 /* Hover previews: images crossfading beside the cursor (screens with a mouse only). Each preview's height follows
@@ -331,11 +272,7 @@ a.project-action:hover::before {
   font-size: clamp(40px, 6vw, 76px);
 }
 
-.drawer-body .feature-meta {
-  margin-top: 14px;
-}
-
-.drawer-body > p:not(.feature-meta) {
+.drawer-body > p {
   margin-top: 18px;
   max-width: 60ch;
 }
@@ -359,7 +296,9 @@ a.project-action:hover::before {
   grid-column: 1 / -1;
 }
 
-.drawer-photos img {
+.drawer-photos img,
+.drawer-photos video {
+  display: block;
   width: 100%;
   aspect-ratio: 4 / 5;
   object-fit: cover;
@@ -371,7 +310,13 @@ a.project-action:hover::before {
 }
 
 /* Shown whole, at its own shape. */
-.drawer-photos .natural img {
+.drawer-photos .natural img,
+.drawer-photos .natural video {
   aspect-ratio: auto;
   height: auto;
+}
+
+/* The white matches the render's background while the first frame loads. */
+.drawer-photos video {
+  background: #FFFFFF;
 }

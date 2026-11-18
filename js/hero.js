@@ -40,38 +40,68 @@
     }
   };
 
+  // Short landscape screens: the radar sits to the left, scaled to fit, and the name takes the right part.
+  const SIDE_BY_SIDE = {
+    maximumHeight: 500,   // screens no taller than this...
+    minimumAspect: 1.4,   // ...and at least this much wider than tall
+    nameShare: 0.56       // the share of the width the name keeps
+  };
+
   const LOADER_COUNT_DURATION = 1350;   // milliseconds the "°C Liquid" counter takes to reach 30
   const LOADER_MINIMUM_TIME = 1500;     // the loader shows at least this long on a first visit
 
   /* ---------- Loader counter (first visit per session only) ---------- */
 
+  const loaderIsShowing = motionEnabled && !root.classList.contains("loader-seen");
+
+  // How long the loader has been on screen. Its progress bar's CSS animation starts when the loader first paints,
+  // which on a slow connection can be well before this script arrives, so the bar's own clock is the true measure.
+  const barFill = document.querySelector(".loader-bar-fill");
+  const barAnimation = loaderIsShowing && barFill.getAnimations ? barFill.getAnimations()[0] : null;
+  const scriptStartTime = performance.now();
+  function loaderShownFor(now) {
+    const barTime = barAnimation ? barAnimation.currentTime : null;
+    return typeof barTime === "number" ? barTime : now - scriptStartTime;
+  }
+
   const loaderNumber = document.getElementById("loader-number");
-  if (motionEnabled && !root.classList.contains("loader-seen")) {
-    const loaderStartTime = performance.now();
+  if (loaderIsShowing) {
+    // Counting from the bar's clock keeps the number and the bar in step.
     const countUp = (now) => {
-      const progress = clamp((now - loaderStartTime) / LOADER_COUNT_DURATION, 0, 1);
+      const progress = clamp(loaderShownFor(now) / LOADER_COUNT_DURATION, 0, 1);
       loaderNumber.textContent = String(Math.round(18 + 12 * easeOut(progress)));
       if (progress < 1) {
         requestAnimationFrame(countUp);
       }
     };
     requestAnimationFrame(countUp);
-    document.querySelector(".loader").addEventListener("click", () => { root.classList.add("loader-seen"); });
   }
 
   /* ---------- Show the landing screen once its layout is final ---------- */
 
-  // Waits for Site.fontsReady, lays the page out, then lets the loader leave and the
+  // Waits for Site.fontsReady and the loader's minimum time, lays the page out, then lets the loader leave and the
   // letters rise. Nothing on the landing screen is visible before this, so nothing jumps or resizes.
-  const loaderIsShowing = motionEnabled && !root.classList.contains("loader-seen");
-  const pageStartTime = performance.now();
-  Site.fontsReady.then(() => {
-    const waitForLoader = loaderIsShowing ? Math.max(0, LOADER_MINIMUM_TIME - (performance.now() - pageStartTime)) : 0;
-    setTimeout(() => {
+  // (If this script is very late, the safety net in index.html's <head> shows the landing screen first.)
+
+  // A click on the loader skips the rest of the minimum time. It still waits for the font, which has almost
+  // always arrived by then, so the name never appears at the wrong size.
+  let skipLoaderWait = () => {};
+  const loaderSkipped = new Promise((resolve) => { skipLoaderWait = resolve; });
+  if (loaderIsShowing) {
+    document.querySelector(".loader").addEventListener("click", () => skipLoaderWait());
+  }
+
+  // Measured from when the loader appeared, so time spent downloading scripts already counts toward the minimum.
+  const loaderMinimumShown = new Promise((resolve) => {
+    setTimeout(resolve, loaderIsShowing ? Math.max(0, LOADER_MINIMUM_TIME - loaderShownFor(performance.now())) : 0);
+  });
+
+  Site.fontsReady
+    .then(() => Promise.race([loaderMinimumShown, loaderSkipped]))
+    .then(() => {
       Site.measureNow();
       root.classList.add("is-hero-ready");
-    }, waitForLoader);
-  });
+    });
 
   /* ---------- Fit the name to the screen ---------- */
 
@@ -157,14 +187,8 @@
   let frameCount = 0;
   const scanStartTime = performance.now();
 
-  // Places the radar in the bottom left, just above the horizontal rule:
-  // Short landscape screens: Radar to the left scaled, and the name to right part.
-  const SIDE_BY_SIDE = {
-    maximumHeight: 500,   // screens no taller than this...
-    minimumAspect: 1.4,   // ...and at least this much wider than tall
-    nameShare: 0.56       // the share of the width the name keeps
-  };
-
+  // Radar placement: bottom left, just above the horizontal rule; on short landscape screens (SIDE_BY_SIDE, in the
+  // settings at the top), beside the name instead.
   function isShortLandscape() {
     return Site.viewportHeight <= SIDE_BY_SIDE.maximumHeight && Site.viewportWidth >= Site.viewportHeight * SIDE_BY_SIDE.minimumAspect;
   }
@@ -429,6 +453,7 @@
 
   // One cycle per pulse: "out" (the pulse travels to the target), "open" (it hits: a wave rings out and the circle
   // opens onto the photo while the echo travels home), "hold", "fade" (dissolves to black), and a short "pause".
+  const NEXT_PHASE = { out: "open", open: "hold", hold: "fade", fade: "pause", pause: "out" };
   let cyclePhase = "out";
   let lastRevealOpacity = "";
   let cycleStartTime = performance.now();
@@ -519,7 +544,6 @@
       fade: PHOTO_PULSE.fadeTime,
       pause: PHOTO_PULSE.pauseTime
     };
-    const nextPhase = { out: "open", open: "hold", hold: "fade", fade: "pause", pause: "out" };
     if (now - cycleStartTime > 4000) {   // back from a background tab: start a fresh cycle
       cyclePhase = "out";
       cycleStartTime = now;
@@ -528,7 +552,7 @@
     while (elapsed >= phaseLengths[cyclePhase]) {
       cycleStartTime += phaseLengths[cyclePhase];
       elapsed = now - cycleStartTime;
-      cyclePhase = nextPhase[cyclePhase];
+      cyclePhase = NEXT_PHASE[cyclePhase];
       if (cyclePhase === "open") {
         hitTime = cycleStartTime;
       }

@@ -17,25 +17,17 @@ html.motion-enabled:not(.loader-seen) .loader {
   color: var(--on-slate);
   grid-template-rows: auto 1fr auto;
   padding: calc(env(safe-area-inset-top, 0px) + 24px) var(--gutter) calc(env(safe-area-inset-bottom, 0px) + 28px);
-  /* Fallback: leave after 4.5 s even if the script never says the page is ready. */
-  animation: loader-out 0.9s cubic-bezier(0.7, 0, 0.2, 1) 4.5s forwards;
-  cursor: pointer;
+  cursor: pointer;   /* a click skips the rest of the minimum wait (js/hero.js) */
 }
 
 /* js/hero.js adds .is-hero-ready once the font has loaded and the hero is laid out, so the loader only leaves
-   when the name underneath is final. */
+   when the name underneath is final. If the scripts are slow, the script in index.html's <head> adds it after
+   4.5 s instead, so the loader and the name always leave and arrive together. */
 html.motion-enabled.is-hero-ready:not(.loader-seen) .loader {
-  animation: loader-out-now 0.9s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+  animation: loader-out 0.9s cubic-bezier(0.7, 0, 0.2, 1) forwards;
 }
 
 @keyframes loader-out {
-  to {
-    transform: translateY(-100%);
-    visibility: hidden;
-  }
-}
-
-@keyframes loader-out-now {
   to {
     transform: translateY(-100%);
     visibility: hidden;
@@ -350,6 +342,12 @@ html:not(.motion-enabled) .radar-note-pause {
 
 /* Looping animations hold still while animations are paused (js/core.js). */
 html.is-animation-paused .cue-line {
+  animation-play-state: paused;
+}
+
+/* ...and while the landing screen is out of sight (data-offscreen-pause, js/core.js). The html.motion-enabled
+   prefix outranks the animation shorthand above, which would otherwise set the loop running again. */
+html.motion-enabled .is-offscreen .cue-line {
   animation-play-state: paused;
 }
 

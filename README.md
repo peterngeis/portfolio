@@ -26,7 +26,7 @@ The page is a stack of sections. Each section has one stylesheet and, where it n
 | Phone and tablet layouts, reduced motion | `css/responsive.css` (keep last) | |
 | Top bar: current chapter, background on phones | | `js/nav.js` |
 | Videos that play while on screen (drop test, keyboard) | | `js/video.js` |
-| Shared helpers, the one animation loop, in-page links (the site slides or fade-jumps itself; no browser navigation) | | `js/core.js` |
+| Shared helpers, the one animation loop, in-page links, pausing CSS loops in sections marked `data-offscreen-pause` while they're out of sight | | `js/core.js` |
 
 Other files:
 

@@ -343,6 +343,16 @@ window.Site = (function () {
     requestAnimationFrame(animationLoop);
   });
 
+  /* ---------- Looping animations off screen ----------
+     Sections marked data-offscreen-pause in index.html get .is-offscreen while no part of them is on screen, and
+     their stylesheets pause CSS loops with it. */
+  if ("IntersectionObserver" in window) {
+    const offscreenObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => entry.target.classList.toggle("is-offscreen", !entry.isIntersecting));
+    });
+    document.querySelectorAll("[data-offscreen-pause]").forEach((section) => offscreenObserver.observe(section));
+  }
+
   /* ---------- Pausing animations ----------
      The pause button in the top bar stops everything that moves on its own: Scroll-driven effects keep
      working. The choice is remembered for the next visit. With reduced, the button is hidden in css/base.css */

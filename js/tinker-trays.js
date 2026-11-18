@@ -1,13 +1,8 @@
 /*
- * tinker-trays.js
- * Phrases in the Tinker time line open small trays of extra material below the sentence: the keyboard model and
- * the band. Each phrase is a link acting as a button (<a class="tinker-trigger" role="button">, so it wraps across
- * lines like the rest of the sentence) whose aria-controls names its tray and data-peek names
- * its hover preview. 
- * 
- * Opening one tray closes the other. On screens with a mouse, hovering a phrase floats its
- * preview beside the cursor; several images crossfade, and the preview takes each image's shape so nothing is
- * cropped. js/video.js plays the keyboard clip while its tray is on screen.
+ * tinker-tray.js
+ * Hover previews for the phrases in the Tinker time line (screens with a mouse only). Each phrase's data-peek names
+ * its preview; hovering floats it beside the cursor, several images crossfade, and the preview takes each image's
+ * shape so nothing is cropped. Clicking a phrase opens its side pane (js/drawer.js), which hides the preview.
  */
 (function (Site) {
   "use strict";
@@ -27,14 +22,6 @@
     clearInterval(peekTimer);
   }
 
-  function setTray(trigger, isOpen) {
-    trigger.setAttribute("aria-expanded", String(isOpen));
-    const tray = document.getElementById(trigger.getAttribute("aria-controls"));
-    if (tray) {
-      tray.hidden = !isOpen;
-    }
-  }
-
   // Keeps a preview beside the cursor, above it where there's room, and always on screen.
   function movePeek(peek, event) {
     const width = peek.offsetWidth;
@@ -52,41 +39,18 @@
     images.forEach((other, i) => other.classList.toggle("is-shown", i === index));
   }
 
+  if (!canHover) {
+    return;
+  }
+
   triggers.forEach((trigger) => {
-    // Space opens it too, as with any button (Enter already clicks a link).
-    trigger.addEventListener("keydown", (event) => {
-      if (event.key === " ") {
-        event.preventDefault();
-        trigger.click();
-      }
-    });
-
-    trigger.addEventListener("click", (event) => {
-      event.preventDefault();   // it opens its tray; it doesn't jump to it
-      const isOpening = trigger.getAttribute("aria-expanded") !== "true";
-      triggers.forEach((other) => {
-        if (other !== trigger && other.getAttribute("aria-expanded") === "true") {
-          setTray(other, false);
-        }
-      });
-      setTray(trigger, isOpening);
-      hidePeek();
-      Site.measureNow();   // everything below just moved
-    });
-
     const peek = document.getElementById(trigger.getAttribute("data-peek"));
-    if (!peek || !canHover) {
-      return;
-    }
-    const images = Array.from(peek.querySelectorAll("img"));
+    const images = peek ? Array.from(peek.querySelectorAll("img")) : [];
     if (images.length === 0) {
       return;
     }
 
     trigger.addEventListener("pointerenter", (event) => {
-      if (trigger.getAttribute("aria-expanded") === "true") {
-        return;   // its tray is already open
-      }
       hidePeek();
       activePeek = peek;
       let index = 0;
@@ -102,5 +66,6 @@
     });
     trigger.addEventListener("pointermove", (event) => movePeek(peek, event));
     trigger.addEventListener("pointerleave", hidePeek);
+    trigger.addEventListener("click", hidePeek);   // close when opening the side pain
   });
 })(window.Site);

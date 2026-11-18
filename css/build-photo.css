@@ -357,3 +357,8 @@ html.motion-enabled .hotspot-marker::after {
 html.is-animation-paused .hotspot-marker::after {
   animation-play-state: paused;
 }
+
+/* While a section is off screen the html.motion-enabled prefix still outranks so videos don't restart. */
+html.motion-enabled .is-offscreen .hotspot-marker::after {
+  animation-play-state: paused;
+}
