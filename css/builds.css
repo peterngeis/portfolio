@@ -320,3 +320,8 @@ a.project-action:hover::before {
 .drawer-photos video {
   background: #FFFFFF;
 }
+
+/* The band's animation is white line art on black, so it waits on black rather than white. */
+.drawer-photos video.video-dark {
+  background: #000000;
+}
